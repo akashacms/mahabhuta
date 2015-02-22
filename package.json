@@ -5,13 +5,21 @@
     "url": "http://davidherron.com"
   },
   "name": "mahabhuta",
+  "keywords": [
+    "htmlparser",
+    "jquery",
+    "selector",
+    "scraper",
+    "parser",
+    "html"
+  ],
   "description": "jQuery-like document processing engine",
   "homepage": "https://github.com/akashacms/mahabhuta",
   "repository": {
     "type": "git",
     "url": "https://github.com/akashacms/mahabhuta.git"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "engines": {
     "node": ">=0.10.1"
   },
