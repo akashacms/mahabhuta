@@ -88,3 +88,20 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
 exports.process1 = function(text, metadata, mahafunc, done) {
 	exports.process(text, metadata, [ mahafunc ], done);
 };
+
+
+/**
+ * The beginnings of Express integration for Mahabhuta.  The only unclarity is
+ * the source for the function array.
+ * /
+exports.express = function(filePath, options, callback) {
+	fs.readFile(filePath, function (err, content) {
+		if (err) callback(new Error(err));
+		else {
+			exports.process(content, options, "TBD - FUNCTIONS", function(err, html) {
+				if (err) callback(err);
+				else callback(null, html);
+			});
+		}
+	})
+};*/
