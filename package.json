@@ -1,0 +1,29 @@
+{
+  "author": {
+    "name": "David Herron",
+    "email": "david@davidherron.com",
+    "url": "http://davidherron.com"
+  },
+  "name": "mahabhuta",
+  "description": "jQuery-like document processing engine",
+  "homepage": "https://github.com/akashacms/mahabhuta",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akashacms/mahabhuta.git"
+  },
+  "bin": {
+  },
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=0.10.1"
+  },
+  "directories": {
+  },
+  "dependencies": {
+    "cheerio": ">=0.17",
+  },
+  "devDependencies": {
+  },
+  "scripts": {
+  }
+}
