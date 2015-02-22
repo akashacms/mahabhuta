@@ -27,11 +27,17 @@ var cheerio = require('cheerio');
 var util    = require('util');
 var async   = require('async');
 
+var configCheerio;
+
+exports.config = function(_configCheerio) {
+    configCheerio = _configCheerio;
+};
+
 /**
  * Simply parse the text, returning $ so the caller can do whatever they want.
  */
 exports.parse = function(text) {
-    return config.cheerio ? cheerio.load(text, config.cheerio) : cheerio.load(text);
+    return configCheerio ? cheerio.load(text, configCheerio) : cheerio.load(text);
 };
 
 /**
