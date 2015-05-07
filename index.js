@@ -76,12 +76,12 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
 				},
 				function(err) {
 					if (err) done(err);
-					else runMahaFuncs();
+					else setImmediate(function() { runMahaFuncs(); });
 				});
 		} else {
 			done(undefined, $.html());
 		}
-	}
+	};
 	runMahaFuncs();
 };
 
