@@ -63,11 +63,41 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
     // Allow a pre-parsed context to be passed in
     var $ = typeof text === 'function' ? text : exports.parse(text);
     
+    var runMahaArray = function(mahaArray) {
+        return new Promise((resolve, reject) => {
+            async.eachSeries(mahaArray,
+            (mahafunc, next) => {
+                // util.log(util.inspect(mahafunc));
+                if (typeof mahafunc === 'function') {
+                    mahafunc($, metadata, setDirty, err => {
+                        if (err) next(err);
+                        else next();
+                    });
+                } else if (Array.isArray(mahafunc)) {
+                    runMahaArray(mahafunc)
+                    .then(() => { next(); })
+                    .catch(err => { next(err); });
+                } else {
+                    console.error("BAD MAHAFUNC "+ util.inspect(mahafunc));
+                    next();
+                }
+            },
+            err => {
+                if (err) reject(err);
+                else resolve();
+            }
+            );  
+        })
+    };
+    
     // Keep running the functions until the page is clean
     var runMahaFuncs = function() {
     	if (cleanOrDirty === 'dirty' || cleanOrDirty === 'first-time') {
     		cleanOrDirty = 'clean';
-			async.eachSeries(mahabhutaFuncs,
+            runMahaArray(mahabhutaFuncs)
+            .then(() => { runMahaFuncs(); })
+            .catch(err => { done(err); });
+/*			async.eachSeries(mahabhutaFuncs,
 				function(mahafunc, next) {
 					mahafunc($, metadata, setDirty, function(err) {
 						if (err) next(err);
@@ -77,7 +107,7 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
 				function(err) {
 					if (err) done(err);
 					else setImmediate(function() { runMahaFuncs(); });
-				});
+				}); */
 		} else {
 			done(undefined, $.html());
 		}
