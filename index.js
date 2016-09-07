@@ -76,19 +76,17 @@ exports.CustomElement = class CustomElement extends exports.Mahafunc {
         var elements = this.findElements($);
         if (elements.length <= 0) return done();
         async.eachSeries(elements, (element, next) => {
-            try {
-                this.process($(element), metadata, setDirty,
-                (err, replaceWith) => {
-                    if (err) return next(err);
-                    $(element).replaceWith(replaceWith);
-                    next();
-                });
-            } catch (err) { next(err); }
+            this.process($(element), metadata, setDirty)
+            .then(replaceWith => {
+                $(element).replaceWith(replaceWith);
+                next();
+            })
+            .catch(err => { next(err); });
         },
         err => {
             // log(`after ak-stylesheets ${metadata.document.path} ${$.html()}`);
             if (err) {
-                console.error(`${this.elementName} Errored with ${util.inspect(err)}`);
+                console.error(`CustomElement ${this.elementName} Errored with ${util.inspect(err)}`);
                 done(err);
             } else done();
         });
@@ -111,9 +109,9 @@ exports.Munger = class Munger extends exports.Mahafunc {
         // console.log(`Munger for ${this.selector} found ${elements.length} items to process`);
         if (elements.length <= 0) return done();
         async.eachSeries(elements, (element, next) => {
-            try {
-                this.process($, $(element), metadata, setDirty, next);
-            } catch (err) { next(err); }
+            this.process($, $(element), metadata, setDirty)
+            .then(() => { next(); })
+            .catch(err => { next(err); });
         },
         err => {
             // log(`after ak-stylesheets ${metadata.document.path} ${$.html()}`);
@@ -153,8 +151,7 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
 
     var runMahaArray = function(mahaArray) {
         return new Promise((resolve, reject) => {
-            async.eachSeries(mahaArray,
-            (mahafunc, next) => {
+            async.eachSeries(mahaArray, (mahafunc, next) => {
                 // util.log(util.inspect(mahafunc));
                 if (mahafunc instanceof exports.CustomElement) {
                     mahafunc.processAll($, metadata, setDirty, next);
