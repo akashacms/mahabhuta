@@ -78,6 +78,7 @@ exports.CustomElement = class CustomElement extends exports.Mahafunc {
         async.eachSeries(elements, (element, next) => {
             this.process($(element), metadata, setDirty)
             .then(replaceWith => {
+                // console.log(`CustomElement ${this.elementName} replaceWith ${replaceWith}`);
                 $(element).replaceWith(replaceWith);
                 next();
             })
