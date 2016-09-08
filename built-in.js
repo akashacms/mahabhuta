@@ -2,6 +2,8 @@
 
 const mahabhuta = require('./index');
 
+exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta built-in", {});
+
 class SiteVerification extends mahabhuta.CustomElement {
 	get elementName() { return "site-verification"; }
 	process($element, metadata, dirty) {
@@ -16,6 +18,7 @@ class SiteVerification extends mahabhuta.CustomElement {
         });
     }
 }
+exports.mahabhuta.addMahafunc(new SiteVerification());
 
 class DNSPrefetch extends mahabhuta.CustomElement {
 	get elementName() { return "dns-prefetch"; }
@@ -42,6 +45,7 @@ class DNSPrefetch extends mahabhuta.CustomElement {
         });
     }
 }
+exports.mahabhuta.addMahafunc(new DNSPrefetch());
 
 class XMLSitemap extends mahabhuta.CustomElement {
 	get elementName() { return "xml-sitemap"; }
@@ -53,14 +57,10 @@ class XMLSitemap extends mahabhuta.CustomElement {
     		var title = $element.attr("title");
     		if (!title) title = "Sitemap";
     		resolve(`<link rel="sitemap" type="application/xml" title="${title}" href="${href}" />`);
-            /* var $ret = mahabhuta.parse('<link rel="sitemap" type="text/css"/>');
-            $ret("link")
-                .attr('title', 'Sitemap')
-                .attr('href', $element.attr('href'));
-            resolve($ret.html()); */
         });
     }
 }
+exports.mahabhuta.addMahafunc(new XMLSitemap());
 
 class ExternalStylesheet extends mahabhuta.CustomElement {
 	get elementName() { return "external-stylesheet"; }
@@ -77,36 +77,28 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
         });
     }
 }
+exports.mahabhuta.addMahafunc(new ExternalStylesheet());
 
 class RSSHeaderMeta extends mahabhuta.Munger {
 	get selector() { return "rss-header-meta"; }
 
 	process($, $link, metadata, dirty, done) {
-        return new Promise((resolve, reject) => {
-            var href = $link.attr('href');
-            if (!href) {
-                return reject(new Error("No href in rss-header-meta tag"));
-            }
-            var $ret = mahabhuta.parse('<link/>');
-            $ret("link")
-                .attr('rel', 'alternate')
-                .attr('type', 'application/rss+xml')
-                .attr('href', href);
-
-            $('head').append($ret.html());
-            $link.remove();
-            resolve();
-        });
+        if ($('html head').get(0)) {
+            return new Promise((resolve, reject) => {
+                var href = $link.attr('href');
+                if (!href) {
+                    return reject(new Error("No href in rss-header-meta tag"));
+                }
+                $('head').append(`<link rel="alternate" type="application/rss+xml" href="${href}"/>`);
+                $link.remove();
+                resolve();
+            });
+        } else return Promise.resolve();
     }
 }
+exports.mahabhuta.addMahafunc(new RSSHeaderMeta());
 
-module.exports = [
-    new SiteVerification(),
-    new DNSPrefetch(),
-    new XMLSitemap(),
-    new ExternalStylesheet(),
-    new RSSHeaderMeta()
-];
+module.exports.configuration = {};
 
 // JavaScript script tags
 
