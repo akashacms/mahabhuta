@@ -154,8 +154,10 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
             async.eachSeries(mahaArray, (mahafunc, next) => {
                 // util.log(util.inspect(mahafunc));
                 if (mahafunc instanceof exports.CustomElement) {
+                    // console.log(`Mahabhuta calling CustomElement ${mahafunc.elementName}`);
                     mahafunc.processAll($, metadata, setDirty, next);
                 } else if (mahafunc instanceof exports.Munger) {
+                    // console.log(`Mahabhuta calling Munger ${mahafunc.selector}`);
                     mahafunc.processAll($, metadata, setDirty, next);
                 } else if (typeof mahafunc === 'function') {
                     mahafunc($, metadata, setDirty, next);
@@ -207,6 +209,8 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
 exports.process1 = function(text, metadata, mahafunc, done) {
 	exports.process(text, metadata, [ mahafunc ], done);
 };
+
+exports.builtin = require('./built-in');
 
 /**
  * The beginnings of Express integration for Mahabhuta.  The only unclarity is
