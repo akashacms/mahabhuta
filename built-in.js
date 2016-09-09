@@ -70,9 +70,9 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
             if (!href) return reject(new Error("No href supplied"));
             var media = $element.attr('media');
             if (media) {
-                resolve(`<link rel="stylesheet" type="application/xml" href="${href}" media="${media}"/>`);
+                resolve(`<link rel="stylesheet" type="text/css" href="${href}" media="${media}"/>`);
             } else {
-                resolve(`<link rel="stylesheet" type="application/xml" href="${href}"/>`);
+                resolve(`<link rel="stylesheet" type="text/css" href="${href}"/>`);
             }
         });
     }
@@ -97,6 +97,38 @@ class RSSHeaderMeta extends mahabhuta.Munger {
     }
 }
 exports.mahabhuta.addMahafunc(new RSSHeaderMeta());
+
+class Partial extends mahabhuta.CustomElement {
+	get elementName() { return "partially"; }
+	process($element, metadata, dirty) {
+        return new Promise((resolve, reject) => {
+
+            dirty();
+            var data  = $element.data();
+    		var fname = $element.attr("file-name");
+    		var txt   = $element.html();
+
+            var d = {};
+            for (var mprop in metadata) { d[mprop] = metadata[mprop]; }
+    		var data = $element.data();
+    		for (var dprop in data) { d[dprop] = data[dprop]; }
+    		d["partialBody"] = txt;
+
+            // find the partial
+            // render the partial using the data provided
+
+            if (module.exports.configuration.renderPartial) {
+                return module.exports.configuration.renderPartial(fname, txt, d)
+                .then(html => {
+                    return `<!-- Gilroy was here --> ${html}`;
+                });
+            } else {
+                reject(new Error("CONFIGURATION ERROR: Unable to render partial"));
+            }
+        });
+    }
+}
+exports.mahabhuta.addMahafunc(new Partial());
 
 module.exports.configuration = {};
 
