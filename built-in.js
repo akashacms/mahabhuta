@@ -99,7 +99,7 @@ class RSSHeaderMeta extends mahabhuta.Munger {
 exports.mahabhuta.addMahafunc(new RSSHeaderMeta());
 
 class Partial extends mahabhuta.CustomElement {
-	get elementName() { return "partially"; }
+	get elementName() { return "partial"; }
 	process($element, metadata, dirty) {
         return new Promise((resolve, reject) => {
 
@@ -118,13 +118,13 @@ class Partial extends mahabhuta.CustomElement {
             // render the partial using the data provided
 
             if (module.exports.configuration.renderPartial) {
-                return module.exports.configuration.renderPartial(fname, txt, d)
-                .then(html => {
-                    return `<!-- Gilroy was here --> ${html}`;
-                });
+                resolve({ fname, body: txt, data: d});
             } else {
-                reject(new Error("CONFIGURATION ERROR: Unable to render partial"));
+                reject(new Error(`CONFIGURATION ERROR: Unable to render partial ${fname}`));
             }
+        })
+        .then(context => {
+            return module.exports.configuration.renderPartial(context.fname, context.body, context.data);
         });
     }
 }
