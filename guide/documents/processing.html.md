@@ -57,6 +57,36 @@ mahabhuta.process(HTMLINPUT, { }, mahafuncs, (err, HTMLOUTPUT) => {
 
 The API follows the old-school callback model for backwards compatibility.
 
+## Order of execution
+
+Each MahafuncArray and each Mahafunc within a MahafuncArray are executed in the order in which they're added.  Later additions go to the end of the list, and are executed later than the earlier additions.
+
+## Overriding a Mahafunc
+
+Suppose you're using a MahafuncArray providing a group of useful Mahafuncs, and you like the behavior of all but one.  It's a wonderful set of Mahafunc's, but that one -- if only it were a little different.  Mahabhuta allows you to override a Mahafunc simply by implementing a different version in an earlier MahafuncArray.
+
+What did I mean by that?  Typically your application uses multiple MahafuncArray's.  If there are two Mahafunc's dealing with the same task, the one which executes first will take care of the task, and the one which executes later will not.  Hence, the first one overrides the second.
+
+This is _over-rideability principle_, meaning that every available action or template must be capable of being overridden.
+
+For example, consider a second CustomElement Mahafunc for the `hello-world` tag we looked at earlier.
+
+```
+var mahafuncs = new mahabhuta.MahafuncArray("example", {});
+
+class HelloWorld extends mahabhuta.CustomElement {
+	get elementName() { return "hello-world"; }
+	process($element, metadata, dirty) {
+		return Promise.resolve("Hello, happy world!");
+	}
+}
+mahafuncs.addMahafunc(new HelloWorld());
+```
+
+Both of these declare they work on the `<hello-world>` tag.  But when does the output say `Hello, world` and when does it say `Hello, happy world`?  The answer depends on which is executed first.  That's because a CustomElement Mahafunc replaces its tag with the result text (we'll go over this in a second).  
+
+One of those `<hello-world>` implementations will execute before the other.  The first one to execute replaces `<hello-world>` with its text.  When the second executes the tag is no longer there and the Mahafunc doesn't perform any work.
+
 # The Mahafunc objects
 
 Currently there are two kinds of Mahafunc's, and a third type we might implement if it makes sense to do so.  We've already seen one, CustomElement, which is meant to process a single element in the DOM, replacing it with something else.  The other, Munger, is meant for wider-ranging changes to the DOM.
@@ -87,6 +117,16 @@ $(element).replaceWith(html);
 Because the `process` function returns a Promise, you can make whatever asynchronous calls you like.
 
 Bottom line:  CustomElement objects are meant to implement, as the name implies, a custom HTML element which is completely replaced by other HTML code.
+
+### Naming CustomElement implementations
+
+It's useful for your custom HTML elements to not collide with the regular HTML elements.  Unless, that is, you want to override a regular HTML element with your custom implementation.  For example you might want a CustomElement to replace old-school `<i>` or `<b>` tags with the new-school `<em>` and `<strong>` tags.  But, normally, you'll want to leave the regular HTML tags alone, and ensure your custom tags do not collide.
+
+A simple policy is to use the `-` character in the `elementName`.  That's because all (or most) of the standard regular HTML elements do not have `-` in their element name.
+
+Et voila, by using `-` in the `elementName` you're almost certainly assured of no naming collision.
+
+Since there's an exception to every rule, the Mahabhuta built-in Mahafunc's does include a tag, `<partial>`, which does not follow this rule.  Live with it, since `<partial>` is the best name for that tag.
 
 ### Data and parameters
 

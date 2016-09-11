@@ -139,5 +139,3 @@ module.exports.configuration = {};
 // ograph && twitter cards
 
 // bootstrap-specific -- responsive embed support
-
-// is there a way to implement `partial` here?
