@@ -1,5 +1,5 @@
 ---
-layout: chapter.html.md
+layout: ebook-page.html.ejs
 title: Project setup
 ---
 

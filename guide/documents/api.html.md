@@ -1,6 +1,6 @@
 ---
-layout: chapter.html.ejs
+layout: ebook-page.html.ejs
 title: Mahabhuta API
 ---
 
-Details of the API 
+Details of the API

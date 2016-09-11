@@ -1,5 +1,5 @@
 ---
-layout: chapter.html.ejs
+layout: ebook-page.html.ejs
 title: Processing HTML DOM with Mahabhuta's Mahafuncs
 ---
 
