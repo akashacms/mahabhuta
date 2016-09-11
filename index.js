@@ -142,11 +142,21 @@ exports.MahafuncArray = class MahafuncArray {
     get name() { return this._name; }
 
     addMahafunc(func) {
-        this._functions.push(func);
+        if (!(func instanceof exports.Mahafunc
+           || func instanceof exports.MahafuncArray
+           || Array.isArray(func))) {
+            throw new Error("Improper addition "+ util.inspect(func));
+        } else {
+            this._functions.push(func);
+        }
     }
 
     setMahafuncArray(functions) {
-        this._functions = functions;
+        if (!(Array.isArray(func))) {
+            throw new Error("Improper mahafunction array "+ util.inspect(func));
+        } else {
+            this._functions = functions;
+        }
     }
 
     process($, metadata, dirty) {
@@ -221,14 +231,14 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
             if (Array.isArray(mahabhutaFuncs)) {
                 mhObj = new exports.MahafuncArray("master", {});
                 mhObj.setMahafuncArray(mahabhutaFuncs);
-            } else if (mahabhutaFuncs instanceof MahafuncArray) {
+            } else if (mahabhutaFuncs instanceof exports.MahafuncArray) {
                 mhObj = mahabhutaFuncs;
             } else {
                 done(new Error(`Bad mahabhutaFuncs object supplied`));
             }
             mhObj.process($, metadata, setDirty)
             .then(() => { runMahaFuncs(); })
-            .catch(err => { console.error(`runMahaFuncs finished with ERROR ${err}`); done(err); });
+            .catch(err => { console.error(`runMahaFuncs finished with ERROR ${err.stack}`); done(err); });
 		} else {
             // console.log(`runMahaFuncs finished normally`);
 			done(undefined, $.html());

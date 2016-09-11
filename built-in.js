@@ -103,7 +103,6 @@ class Partial extends mahabhuta.CustomElement {
 	process($element, metadata, dirty) {
         return new Promise((resolve, reject) => {
 
-            dirty();
             var data  = $element.data();
     		var fname = $element.attr("file-name");
     		var txt   = $element.html();
@@ -118,6 +117,7 @@ class Partial extends mahabhuta.CustomElement {
             // render the partial using the data provided
 
             if (module.exports.configuration.renderPartial) {
+                dirty();
                 resolve({ fname, body: txt, data: d});
             } else {
                 reject(new Error(`CONFIGURATION ERROR: Unable to render partial ${fname}`));
