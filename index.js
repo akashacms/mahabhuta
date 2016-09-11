@@ -144,6 +144,7 @@ exports.MahafuncArray = class MahafuncArray {
     addMahafunc(func) {
         if (!(func instanceof exports.Mahafunc
            || func instanceof exports.MahafuncArray
+           || typeof func === 'function'
            || Array.isArray(func))) {
             throw new Error("Improper addition "+ util.inspect(func));
         } else {
@@ -152,8 +153,8 @@ exports.MahafuncArray = class MahafuncArray {
     }
 
     setMahafuncArray(functions) {
-        if (!(Array.isArray(func))) {
-            throw new Error("Improper mahafunction array "+ util.inspect(func));
+        if (!(Array.isArray(functions))) {
+            throw new Error("Improper mahafunction array "+ util.inspect(functions));
         } else {
             this._functions = functions;
         }
@@ -234,7 +235,7 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
             } else if (mahabhutaFuncs instanceof exports.MahafuncArray) {
                 mhObj = mahabhutaFuncs;
             } else {
-                done(new Error(`Bad mahabhutaFuncs object supplied`));
+                return done(new Error(`Bad mahabhutaFuncs object supplied`));
             }
             mhObj.process($, metadata, setDirty)
             .then(() => { runMahaFuncs(); })
