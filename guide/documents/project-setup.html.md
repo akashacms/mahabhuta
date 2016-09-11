@@ -36,6 +36,108 @@ At the moment the Mahabhuta version documented in this book is available solely 
 
 # A small Mahabhuta example
 
+In an empty directory, create a file named `hello-world.js` containing the following:
+
+```
+'use strict';
+
+const mahabhuta = require('mahabhuta');
+
+var mahafuncs = new mahabhuta.MahafuncArray("example", {});
+
+class HelloWorld extends mahabhuta.CustomElement {
+	get elementName() { return "hello-world"; }
+	process($element, metadata, dirty) {
+		return Promise.resolve("Hello, world!");
+	}
+}
+mahafuncs.addMahafunc(new HelloWorld());
+
+mahabhuta.config({
+    recognizeSelfClosing: true,
+    recognizeCDATA: true
+});
+
+mahabhuta.process(`
+    <html>
+    <head>
+    <title>Hi</title>
+    </head>
+    <body>
+    <hello-world></hello-world>
+    </body>
+    </html>
+`, {}, mahafuncs, (err, html) => {
+    if (err) console.error(err);
+    else console.log(html);
+});
+```
+
+In that directory run:
+
+```
+$ npm init
+    answer all the questions
+$ npm install akashacms/mahabhuta#akasharender --save
+$ node ..hello-world
+<html>
+<head>
+<title>Hi</title>
+</head>
+<body>
+Hello, world!
+</body>
+</html>
+```
+
+Notice that the tag, `<hello-world>`, was replaced by the text: `Hello, world!`
+
+```
+var mahafuncs = new mahabhuta.MahafuncArray("example", {});
+
+class HelloWorld extends mahabhuta.CustomElement {
+	get elementName() { return "hello-world"; }
+	process($element, metadata, dirty) {
+		return Promise.resolve("Hello, world!");
+	}
+}
+mahafuncs.addMahafunc(new HelloWorld());
+```
+
+The `MahafuncArray` object is used to store an array of what we call, for lack of a better name, Mahafunc's.  A Mahafunc is the unit of processing in Mahabhuta.  There is a base class, Mahafunc, and two subclasses one of which we see here, CustomElement.  
+
+CustomElement instances match elements named by the `elementName` method.  For each matching element the `process` function is called, and the result of the Promise it returns are inserted into the output.
+
+What we've done is define a MahafuncArray containing one Mahafunc.
+
+```
+mahabhuta.config({
+    recognizeSelfClosing: true,
+    recognizeCDATA: true
+});
+```
+
+This does some necessary configuration of Mahabhuta.  Under the covers it uses Cheerio, and the configuration parameters are actually Cheerio's.
+
+```
+mahabhuta.process(`
+    <html>
+    <head>
+    <title>Hi</title>
+    </head>
+    <body>
+    <hello-world></hello-world>
+    </body>
+    </html>
+`, {}, mahafuncs, (err, html) => {
+    if (err) console.error(err);
+    else console.log(html);
+});
+```
+
+Here we process some HTML, using the MahafuncArray we just defined.  The second parameter is a metadata object, whose contents can be used to pass data into the Mahafunc's.  The callback either gives an error, or some HTML.
+
+This should give a taste of what you can do with Mahabhuta.  In the next chapter we'll go more deeply into what it can do.
 
 # etc
 
