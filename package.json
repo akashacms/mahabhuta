@@ -9,19 +9,20 @@
     "htmlparser",
     "jquery",
     "selector",
-    "scraper",
     "parser",
-    "html"
+    "html",
+    "DOM",
+    "template"
   ],
-  "description": "jQuery-like document processing engine",
+  "description": "Server-side DOM processing for HTML documents using jQuery-like API",
   "homepage": "https://github.com/akashacms/mahabhuta",
   "repository": {
     "type": "git",
     "url": "https://github.com/akashacms/mahabhuta.git"
   },
-  "version": "0.4.2",
+  "version": "0.5.0",
   "engines": {
-    "node": ">=0.10.1"
+    "node": ">=4.0"
   },
   "dependencies": {
     "cheerio": ">=0.19.x",
