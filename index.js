@@ -25,9 +25,10 @@
 
 'use strict';
 
-var cheerio = require('cheerio');
-var util    = require('util');
-var async   = require('async');
+const cheerio = require('cheerio');
+const util    = require('util');
+const async   = require('async');
+const fs      = require('fs');
 
 var configCheerio;
 
@@ -162,6 +163,7 @@ exports.MahafuncArray = class MahafuncArray {
 
     process($, metadata, dirty) {
         return new Promise((resolve, reject) => {
+            // console.log(util.inspect(this._functions));
             async.eachSeries(this._functions, (mahafunc, next) => {
                 // util.log(util.inspect(mahafunc));
                 if (mahafunc instanceof exports.CustomElement) {
@@ -225,14 +227,16 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
 
     // Keep running the functions until the page is clean
     var runMahaFuncs = function() {
-        // console.log(`START RUNMAHAFUNCS`);
+        // console.log(`START RUNMAHAFUNCS ${util.inspect(mahabhutaFuncs)}`);
     	if (cleanOrDirty === 'dirty' || cleanOrDirty === 'first-time') {
     		cleanOrDirty = 'clean';
             var mhObj;
             if (Array.isArray(mahabhutaFuncs)) {
+                // console.log(`ARRAY substitution`);
                 mhObj = new exports.MahafuncArray("master", {});
                 mhObj.setMahafuncArray(mahabhutaFuncs);
             } else if (mahabhutaFuncs instanceof exports.MahafuncArray) {
+                // console.log(`MahafuncArray`);
                 mhObj = mahabhutaFuncs;
             } else {
                 return done(new Error(`Bad mahabhutaFuncs object supplied`));
@@ -255,17 +259,19 @@ exports.process1 = function(text, metadata, mahafunc, done) {
 exports.builtin = require('./built-in');
 
 /**
- * The beginnings of Express integration for Mahabhuta.  The only unclarity is
- * the source for the function array.
- * /
-exports.express = function(filePath, options, callback) {
-	fs.readFile(filePath, function (err, content) {
-		if (err) callback(new Error(err));
-		else {
-			exports.process(content, options, "TBD - FUNCTIONS", function(err, html) {
-				if (err) callback(err);
-				else callback(null, html);
+ * Integrate Mahabhuta as an Express template engine. UNTESTED
+ */
+exports.registerExpress = function(app, ext, mahafuncs) {
+    app.engine(ext, (filePath, options, callback)  => {
+        // console.log(`Mahabhuta Express Engine ${util.inspect(mahafuncs)}`);
+    	fs.readFile(filePath, (err, content) => {
+    		if (err) return callback(err);
+            // console.log(`Mahabhuta Express Engine ${util.inspect(mahafuncs)}`);
+			exports.process(content, options, mahafuncs, (err, html) => {
+				if (err) { /* console.error(`Mahabhuta Express Engine ERROR ${err}`); */ callback(err); }
+				else { /* console.log(`Mahabhuta OKAY: ${html}`); */ callback(undefined, html); }
 			});
-		}
-	})
-};*/
+    	});
+    });
+    // console.log(`Mahabhuta Express Engine constructor ${util.inspect(this)} ------ ${util.inspect(this.mahafuncs)}`);
+};
