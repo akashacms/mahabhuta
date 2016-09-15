@@ -259,7 +259,7 @@ exports.process1 = function(text, metadata, mahafunc, done) {
 exports.builtin = require('./built-in');
 
 /**
- * Integrate Mahabhuta as an Express template engine. UNTESTED
+ * Integrate Mahabhuta as an Express template engine.
  */
 exports.registerExpress = function(app, ext, mahafuncs) {
     app.engine(ext, (filePath, options, callback)  => {

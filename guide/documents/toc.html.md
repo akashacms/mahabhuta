@@ -9,6 +9,7 @@ title: Table of Contents
     <li><a href="project-setup.html" id="project-setup">Project Setup</a></li>
     <li><a href="processing.html" id="processing">Processing HTML DOM with Mahabhuta's Mahafuncs</a></li>
     <li><a href="built-in.html" id="built-in">Using the built-in Mahafuncs</a></li>
+    <li><a href="express.html" id="built-in">Using Mahabhuta in an Express application</a></li>
     <li><a href="api.html" id="api">The Mahabhuta API</a></li>
 </ol>
 </nav>
