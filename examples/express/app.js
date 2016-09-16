@@ -1,6 +1,7 @@
 'use strict';
 
 const mahabhuta = require('mahabhuta');
+const maha      = require('./maha');
 
 const express = require('express');
 const util = require('util');
@@ -17,7 +18,10 @@ var app = express();
 
 // view engine setup
 
-mahabhuta.registerExpress(app, "maha", mahabhuta.builtin.mahabhuta);
+// TODO add more mahafuncs here
+maha.addMahafunc(mahabhuta.builtin.mahabhuta);
+maha.partialDir(path.join(__dirname, "partials"));
+maha.registerExpress(app, "maha");
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'maha');

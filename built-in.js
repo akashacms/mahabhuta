@@ -125,7 +125,11 @@ class Partial extends mahabhuta.CustomElement {
         })
         .then(context => {
             return module.exports.configuration.renderPartial(context.fname, context.body, context.data);
-        });
+        })/*
+		.then(rendered => {
+			console.log(`partial got rendered ${rendered}`);
+			return rendered;
+		})*/;
     }
 }
 exports.mahabhuta.addMahafunc(new Partial());

@@ -257,21 +257,3 @@ exports.process1 = function(text, metadata, mahafunc, done) {
 };
 
 exports.builtin = require('./built-in');
-
-/**
- * Integrate Mahabhuta as an Express template engine.
- */
-exports.registerExpress = function(app, ext, mahafuncs) {
-    app.engine(ext, (filePath, options, callback)  => {
-        // console.log(`Mahabhuta Express Engine ${util.inspect(mahafuncs)}`);
-    	fs.readFile(filePath, (err, content) => {
-    		if (err) return callback(err);
-            // console.log(`Mahabhuta Express Engine ${util.inspect(mahafuncs)}`);
-			exports.process(content, options, mahafuncs, (err, html) => {
-				if (err) { /* console.error(`Mahabhuta Express Engine ERROR ${err}`); */ callback(err); }
-				else { /* console.log(`Mahabhuta OKAY: ${html}`); */ callback(undefined, html); }
-			});
-    	});
-    });
-    // console.log(`Mahabhuta Express Engine constructor ${util.inspect(this)} ------ ${util.inspect(this.mahafuncs)}`);
-};
