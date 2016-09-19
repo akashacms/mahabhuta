@@ -19,44 +19,32 @@
 <ak-headerJavaScript></ak-headerJavaScript>
 
 </head>
-<body>
+<body class="ebook-toc-page">
 
 <partial file-name="site-navbar.html"></partial>
 
 <div class="container" role="main">
 <div class="row">
-<div class="col-sm-12"><partial file-name="ebook-header.html.ejs"></partial></div>
+<ebook-page-header class="col-sm-12"></ebook-page-header>
 </div>
 
 <div class="row">
   <article class="col-sm-8">
     <div class="panel panel-default">
-        <strong><%= bookTitle %></strong><br/>
-        <strong><%= bookSubTitle %></strong><br/>
-        By <%= authors %><br/>
-        Published <%= published %>, <%= language %>
-        <% if (source) {
-            %><br/><strong>Source</strong> <a href="<%= source %>"><%= source %></a><%
-        } %>
-        <% if (typeof downloadURL !== 'undefined' && downloadURL) {
-            %><br/>
-            <button id="download-button" class="btn btn-default"
-                data-download-url="<%= downloadURL %>"
-                type="button" data-toggle="modal" data-target="#donationModal">
-                    Download <%= downloadTitle %>
-            </button><%
-        } %>
+        <ebook-nameplate-block></ebook-nameplate-block>
     </div>
+    <div class="ebook-toc-page-toc">
     <%- content %>
-    <book-toc-list-group></book-toc-list-group>
+    </div>
+    <!-- book-toc-list-group></book-toc-list-group -->
   </article>
   <div class="col-sm-4">
-      <img src="<%= coverImage %>" width="100%"/>
+      <% if (typeof coverImage !== 'undefined') { %><img src="<%= coverImage %>" width="100%"/><% } %>
   </div>
 </div>
 
 <footer class="row" style="text-align: center; height: 100px;">
-<partial file-name="footer.html.ejs"></partial>
+<div class="col-sm-12"><partial file-name="footer.html.ejs"></partial></div>
 </footer>
 </div>
 

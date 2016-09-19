@@ -1,0 +1,65 @@
+<%
+
+// This is meant to be used at the top of the page.  It shows a normal website masthead
+// that's attuned to displaying a Book "Masthead".  There is room for a logo image,
+// the title, subtitle and author of the book.
+
+  if (typeof logoImage === 'undefined' || !logoImage) {
+      logoImage = siteLogoImage;
+      logoWidth = siteLogoWidth;
+  }
+  if (typeof bookHomeURL === 'undefined' || !bookHomeURL) {
+      bookHomeURL = '/';
+  }
+
+if (typeof divclass === 'undefined') {
+    divclass = "epub-website-ebook-navigation-header";
+} else {
+    divclass += " epub-website-ebook-navigation-header";
+}
+//  height: 61px; style="width: 100%; text-align: center; display: table;"
+%><div class="<%= divclass %>" style="vertical-align: middle; text-align: center;display: table;"
+    <% if (divid)    { %> id="<%= divid %>" <% } %> >
+
+<div style="float: left; height: 110px;  display: table-cell;">
+    <a href="<%= bookHomeURL %>">
+        <img src="<%= logoImage %>" style="max-height: 60px; display: block;"/>
+    </a>
+    <div class="btn-group" style="clear: both;">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+        Table of Contents
+        <span class="caret"></span>
+      </button>
+      <%- tochtml %>
+    </div>
+</div>
+
+<span style="vertical-align: middle; height: 110px;  display: table-cell;">
+    <div style="clear: both;">
+        <% if (typeof bookTitle !== "undefined") {
+           %><a href="<%= bookHomeURL %>"><h2 align="center"><%= bookTitle %></a></h2><%
+        } else if (typeof title !== "undefined") {
+           %><a href="<%= bookHomeURL %>"><h2 align="center"><%= title %></a></h2><%
+        } %>
+    </div>
+    <div style="clear: both;">
+        <a href="<%= prevhref %>">
+            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true" style="display: inline"></span>
+        </a>
+
+        <h1 class="panel-title" align="center" style="vertical-align: middle; text-align: center; word-wrap: break-word; display: inline"><%
+            if (typeof sectionTitle !== 'undefined' && sectionTitle) {
+                %><%= sectionTitle %><%
+            } else {
+                %><%= title %><%
+            }
+        %></h1>
+
+        <a href="<%= nexthref %>">
+            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true" style="display: inline"></span>
+        </a>
+    </div>
+</span>
+
+</div>

@@ -1,6 +1,15 @@
 ---
 layout: ebook-toc-page.html.ejs
 title: Table of Contents
+logoImage: /css/MAHABHUTA.png
+logoWidth: 200px
+bookTitle: "Mahabhuta - DOM-processing on the server in Node.js"
+bookAuthor: "David Herron"
+bookHomeURL: '/toc.html'
+authors: "David Herron"
+published: "2016"
+language: "English"
+# coverImage: "/books/hahnemann/organon/assets/cover-image.jpg"
 ---
 
 <nav epub:type="toc" id="toc">

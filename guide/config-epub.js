@@ -3,15 +3,13 @@
 const util    = require('util');
 const akasha  = require('akasharender');
 
-
-const log    = require('debug')('hmp-organon:configuration');
-const error  = require('debug')('hmp-organon:error-configuration');
+const log    = require('debug')('mahabhuta-guide:configuration');
+const error  = require('debug')('mahabhuta-guide:error-configuration');
 
 const config = new akasha.Configuration();
 
-
 config
-    .addAssetsDir('assets')
+    .addAssetsDir('assets-epub')
     .addLayoutsDir('layout-epub')
     .addDocumentsDir('documents')
     .addPartialsDir('partials-epub')

@@ -1,6 +1,7 @@
 ---
 layout: ebook-page.html.ejs
 title: Project setup
+bookHomeURL: '/toc.html'
 ---
 
 # Setting up Node.js
