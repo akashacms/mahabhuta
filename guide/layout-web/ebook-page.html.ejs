@@ -24,150 +24,64 @@ html, body {
     height:100%;
     max-height:100%;
     margin:0;
-    /* overflow: hidden; */
-	/* padding-top: 0px !important; */
 }
 
-/* .epub-website-ebook-navigation-header {
-    height: 50px;
-} */
+#page-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
 
-.epub-website-ebook-navigation-header h2 {
+#site-navbar {
+    display: none;
+    flex-shrink: 0;
+    height: 30px;
+}
+
+#ebook-masthead {
+    flex-shrink: 0;
+    height: 60px;
+}
+
+#ebook-masthead h2 {
     font-size: 22px;
     margin-top: 0px;
 }
 
-div#page-container {
-    /* position: absolute;
-    top: 0px;
-    right: 0px;
-    bottom: 0px;
-    left: 0px; */
-    /* height:100%; */
-    padding-top: 155px;
-    padding-bottom: 65px;
-    display: flex;
-    display: -webkit-flex;
-    /* flex-flow: row wrap; */
-    flex-direction: column;
-    -webkit-flex-direction: column;
-    -webkit-align-content: stretch;
-    align-content: stretch;
+#ebook-navigation {
+    flex-shrink: 0;
+    height: 60px;
 }
 
-div#page-container #header-row {
-    order: 1;
-    /* flex: 1;
-    -webkit-flex: 1; */
-    height: 100px;
-    flex: none;
-    /* position: absolute;
-    top: 0;
-    left: 0;
-    right: 0; */
-    width: 100%;
+#book-page-content {
+    flex-grow: 1;
+    overflow: auto;
+    min-height: 2em;
 }
 
-div#page-container #content-row {
-    order: 2;
-    flex: 1;
-    -webkit-flex: 1;
-    width: 100%;
-    /* display: flex;
-    flex-direction: column; */
-    /* position: absolute;
-    top: 150px;
-    left: 0;
-    right: 0;
-    bottom: 0; */
-    /* order: 2; */
-    /* position: relative; */
-}
-
-div#page-container #footer-row {
-    /* text-align: center;
-    height: 100px;
-    width: 100%; */
-    order: 3;
-    width: 100%;
-    flex: none;
-    height: 30px;
-}
-
-div#page-container #content-row article {
-    /* height: 100%;
-    min-height:100%; */
-    /* display: flex;
-    flex-direction: column; */
-    /* order: 1;
-    flex-grow: 1; */
-
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
-
-div#page-container #content-row article .epub-website-ebook-navigation-header {
-    /* order: 1;
-    width: 100%;
-    height: 61px;
-    flex: none; */
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 61px;
-    /*overflow: hidden; */
-}
-
-div#page-container #content-row article #book-page-content {
-    position: absolute;
-    top: 65px;
-    left: 10px;
-    right: 10px;
-    bottom: 0;
-    overflow-y: auto;
-    /* height: 100%; */
-    /* order: 2;
-    overflow-y: scroll; */
-    /* height: 100%;
-    min-height:100%; */
-    /* padding-top: 62px; */
-    /* width: 100%; */
-    /* height:100%;
-    display: flex;
-    display: -webkit-flex;
-    flex-direction: column;
-    -webkit-flex-direction: column;
-    -webkit-align-content: stretch;
-    align-content: stretch; */
+#footer-row {
+    display: none;
+    flex-shrink: 0;
+    height: 50px;
+    background-color: grey;
 }
 
 </style>
 </head>
 <body class="ebook-page">
 
-<!--  partial file-name="site-navbar.html"></partial -->
-<nav class="navbar navbar-default navbar-fixed-top">
-    <ebook-navigation-header class="container" template="mahabhuta-ebook-navigation-header.html.ejs"></ebook-navigation-header>
-</nav>
 
-<div id="page-container"  > <!-- class="container-fluid" role="main" -->
-<!-- ebook-page-header id="header-row"></ebook-page-header --> <!--  class="col-sm-12" -->
-
-<article id="content-row" class="panel panel-default"> <!-- class="col-sm-12 panel panel-default" -->
-  <!-- ebook-navigation-header class="panel-heading"></ebook-navigation-header -->
-  <div id="book-page-content" class="panel-body"><%- content %></div>
-</article>
-
-<nav class="navbar navbar-default navbar-fixed-bottom">
-<footer id="footer-row" class="container"> <!--  class="row" -->
-<div><partial file-name="footer.html.ejs"></partial></div> <!--  class="col-sm-12" -->
-</footer>
+<div id="page-container">
+    <div id="site-navbar"><partial file-name="site-navbar.html"></partial></div>
+    <ebook-page-header id="ebook-masthead" header-height="60px"></ebook-page-header>
+    <ebook-navigation-header id="ebook-navigation"></ebook-navigation-header>
+    <div id="book-page-content" class="panel-body"><%- content %></div>
+    <footer id="footer-row" class="container">
+    <partial file-name="footer.html.ejs"></partial>
+    </footer>
 </div>
-</nav>
 
 <ak-footerJavaScript></ak-footerJavaScript>
 <partial file-name="google-analytics.html"></partial>

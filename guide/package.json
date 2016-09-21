@@ -26,6 +26,7 @@
     "akashacms-theme-bootstrap": "akashacms/akashacms-theme-bootstrap#akasharender",
     "akasharender": ">=0.5",
     "akasharender-epub": "akashacms/akasharender-epub",
+    "epub-website": "akashacms/epub-website",
     "bower": "^1.7.9",
     "debug": "^2.2.0",
     "epubtools": "^0.1.6",
