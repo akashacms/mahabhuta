@@ -98,6 +98,27 @@ class RSSHeaderMeta extends mahabhuta.Munger {
 }
 exports.mahabhuta.addMahafunc(new RSSHeaderMeta());
 
+class BodyAddClass extends mahabhuta.Munger {
+	get selector() { return "body-add-class"; }
+	process($, $link, metadata, dirty, done) {
+        if ($('html body').get(0)) {
+            return new Promise((resolve, reject) => {
+				var clazz = $link.attr('class');
+				if (!clazz) {
+					return reject(new Error("No class in body-add-class tag"));
+				}
+				if (!$('html body').hasClass(clazz)) {
+					$('html body').addClass(clazz);
+				}
+				$link.remove();
+				resolve();
+			});
+	    } else return Promise.resolve();
+	}
+}
+exports.mahabhuta.addMahafunc(new BodyAddClass());
+
+
 class Partial extends mahabhuta.CustomElement {
 	get elementName() { return "partial"; }
 	process($element, metadata, dirty) {
