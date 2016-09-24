@@ -132,6 +132,12 @@ exports.Munger = class Munger extends exports.Mahafunc {
     }
 }
 
+exports.PageProcessor = class PageProcessor extends exports.Mahafunc {
+    process($, metadata, setDirty) {
+        throw new Error("The 'process' function must be overridden")
+    }
+}
+
 exports.MahafuncArray = class MahafuncArray {
 
     constructor(name, config) {
@@ -174,6 +180,11 @@ exports.MahafuncArray = class MahafuncArray {
                 } else if (mahafunc instanceof exports.Munger) {
                     // console.log(`Mahabhuta calling Munger ${mahafunc.selector}`);
                     mahafunc.processAll($, metadata, dirty)
+                    .then(() => { next(); })
+                    .catch(err => { next(err); });
+                } else if (mahafunc instanceof exports.PageProcessor) {
+                    // console.log(`Mahabhuta calling PageProcessor `);
+                    mahafunc.process($, metadata, dirty)
                     .then(() => { next(); })
                     .catch(err => { next(err); });
                 } else if (mahafunc instanceof exports.MahafuncArray) {
