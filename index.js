@@ -231,36 +231,32 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
     if (!mahabhutaFuncs || mahabhutaFuncs.length < 0) mahabhutaFuncs = [];
 
 	var cleanOrDirty = 'first-time';
-	var setDirty = function() { cleanOrDirty = 'dirty'; };
 
     // Allow a pre-parsed context to be passed in
     var $ = typeof text === 'function' ? text : exports.parse(text);
 
-    // Keep running the functions until the page is clean
-    var runMahaFuncs = function() {
-        // console.log(`START RUNMAHAFUNCS ${util.inspect(mahabhutaFuncs)}`);
-    	if (cleanOrDirty === 'dirty' || cleanOrDirty === 'first-time') {
-    		cleanOrDirty = 'clean';
-            var mhObj;
-            if (Array.isArray(mahabhutaFuncs)) {
-                // console.log(`ARRAY substitution`);
-                mhObj = new exports.MahafuncArray("master", {});
-                mhObj.setMahafuncArray(mahabhutaFuncs);
-            } else if (mahabhutaFuncs instanceof exports.MahafuncArray) {
-                // console.log(`MahafuncArray`);
-                mhObj = mahabhutaFuncs;
-            } else {
-                return done(new Error(`Bad mahabhutaFuncs object supplied`));
-            }
-            mhObj.process($, metadata, setDirty)
-            .then(() => { runMahaFuncs(); })
-            .catch(err => { console.error(`runMahaFuncs finished with ERROR ${err.stack}`); done(err); });
-		} else {
-            // console.log(`runMahaFuncs finished normally`);
-			done(undefined, $.html());
-		}
-	};
-	runMahaFuncs();
+    async.doWhilst(
+    next => {
+        var mhObj;
+        if (Array.isArray(mahabhutaFuncs)) {
+            // console.log(`ARRAY substitution`);
+            mhObj = new exports.MahafuncArray("master", {});
+            mhObj.setMahafuncArray(mahabhutaFuncs);
+        } else if (mahabhutaFuncs instanceof exports.MahafuncArray) {
+            // console.log(`MahafuncArray`);
+            mhObj = mahabhutaFuncs;
+        } else return done(new Error(`Bad mahabhutaFuncs object supplied`));
+
+        cleanOrDirty = 'clean';
+        mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; })
+        .then(() => { next(undefined, $); })
+        .catch(err => { console.error(`runMahaFuncs finished with ERROR ${err.stack}`); next(err); });
+    },
+    () => { return cleanOrDirty === 'dirty'; },
+    (err, $) => {
+        if (err) done(err);
+        else done(undefined, $.html());
+    });
 };
 
 exports.process1 = function(text, metadata, mahafunc, done) {
