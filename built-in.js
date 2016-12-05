@@ -53,11 +53,11 @@ class XMLSitemap extends mahabhuta.CustomElement {
 	process($element, metadata, dirty) {
         return co(function* () {
             // http://microformats.org/wiki/rel-sitemap
-    		var href = $element.attr("href");
-    		if (!href) href = "/sitemap.xml";
-    		var title = $element.attr("title");
-    		if (!title) title = "Sitemap";
-    		return `<link rel="sitemap" type="application/xml" title="${title}" href="${href}" />`;
+            var href = $element.attr("href");
+            if (!href) href = "/sitemap.xml";
+            var title = $element.attr("title");
+            if (!title) title = "Sitemap";
+            return `<link rel="sitemap" type="application/xml" title="${title}" href="${href}" />`;
         });
     }
 }
@@ -81,9 +81,9 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
 exports.mahabhuta.addMahafunc(new ExternalStylesheet());
 
 class RSSHeaderMeta extends mahabhuta.Munger {
-	get selector() { return "rss-header-meta"; }
+    get selector() { return "rss-header-meta"; }
 
-	process($, $link, metadata, dirty, done) {
+    process($, $link, metadata, dirty, done) {
         if ($('html head').get(0)) {
             return co(function* () {
                 var href = $link.attr('href');
@@ -119,18 +119,18 @@ exports.mahabhuta.addMahafunc(new BodyAddClass());
 
 
 class Partial extends mahabhuta.CustomElement {
-	get elementName() { return "partial"; }
-	process($element, metadata, dirty) {
+    get elementName() { return "partial"; }
+    process($element, metadata, dirty) {
         return co(function* () {
             var data  = $element.data();
             var fname = $element.attr("file-name");
-            var txt   = $element.html();
+            var body  = $element.html();
 
             var d = {};
             for (var mprop in metadata) { d[mprop] = metadata[mprop]; }
             var data = $element.data();
             for (var dprop in data) { d[dprop] = data[dprop]; }
-            d["partialBody"] = txt;
+            d["partialBody"] = body;
 
             // find the partial
             // render the partial using the data provided
