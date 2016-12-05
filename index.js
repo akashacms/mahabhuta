@@ -67,24 +67,24 @@ exports.Mahafunc = class Mahafunc {
 exports.CustomElement = class CustomElement extends exports.Mahafunc {
 
     get elementName() { throw new Error("The 'elementName' getter must be overridden"); }
-	get selector() { return this.elementName; }
+    get selector() { return this.elementName; }
 
     process($element, metadata, setDirty, done) {
         throw new Error("The 'process' function must be overridden");
     }
 
     processAll($, metadata, setDirty) {
-        var that = this;
+        var custom = this;
         return co(function *() {
             try {
-                var elements = that.findElements($);
+                var elements = custom.findElements($);
                 if (elements.length <= 0) return;
                 for (var element of elements) {
-                    let replaceWith = yield that.process($(element), metadata, setDirty);
+                    let replaceWith = yield custom.process($(element), metadata, setDirty);
                     $(element).replaceWith(replaceWith);
                 }
             } catch (e) {
-                console.error(`CustomElement ${that.elementName} Errored with ${util.inspect(e)}`);
+                console.error(`CustomElement ${custom.elementName} Errored with ${util.inspect(e)}`);
                 throw e;
             }
         });
@@ -102,16 +102,16 @@ exports.Munger = class Munger extends exports.Mahafunc {
         throw new Error("The 'process' function must be overridden")
     }
     processAll($, metadata, setDirty) {
-        var that = this;
+        var munger = this;
         return co(function *() {
             try {
-                var elements = that.findElements($);
+                var elements = munger.findElements($);
                 if (elements.length <= 0) return;
                 for (var element of elements) {
-                    yield that.process($, $(element), metadata, setDirty);
+                    yield munger.process($, $(element), metadata, setDirty);
                 }
             } catch (e) {
-                console.error(`Munger ${that.selector} Errored with ${util.inspect(e)}`);
+                console.error(`Munger ${munger.selector} Errored with ${util.inspect(e)}`);
                 throw e;
             }
         });
@@ -154,9 +154,9 @@ exports.MahafuncArray = class MahafuncArray {
     }
 
     process($, metadata, dirty) {
-        var that = this;
+        var mhArray = this;
         return co(function *() {
-            for (var mahafunc of that._functions) {
+            for (var mahafunc of mhArray._functions) {
                 if (mahafunc instanceof exports.CustomElement) {
                     // console.log(`Mahabhuta calling CustomElement ${mahafunc.elementName}`);
                     yield mahafunc.processAll($, metadata, dirty);
@@ -176,7 +176,7 @@ exports.MahafuncArray = class MahafuncArray {
                         });
                     });
                 } else if (Array.isArray(mahafunc)) {
-                    let mhObj = new exports.MahafuncArray("inline", that._config);
+                    let mhObj = new exports.MahafuncArray("inline", mhArray._config);
                     mhObj.setMahafuncArray(mahafunc);
                     yield mhObj.process($, metadata, dirty);
                 } else {
@@ -197,22 +197,22 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
     .then(html => { done(undefined, html); })
     .catch(err => { done(err); });
 
-	// If we were on a Synchronous platform, this might be
-	//
-	// var cleanOrDirty = 'first-time';
-	// while (dirtyOrClean !== 'dirty' && dirtyOrClean !== 'first-time') {
-	// 		cleanOrDirty = 'clean';
-	//		mahabhutaFuncs.forEach(function(mahafunc) {
-	//			mahafunc($, metadata, setDirty, function(err) { ... });
-	//      }
-	// }
+    // If we were on a Synchronous platform, this might be
+    //
+    // var cleanOrDirty = 'first-time';
+    // while (dirtyOrClean !== 'dirty' && dirtyOrClean !== 'first-time') {
+    // 		cleanOrDirty = 'clean';
+    //		mahabhutaFuncs.forEach(function(mahafunc) {
+    //			mahafunc($, metadata, setDirty, function(err) { ... });
+    //      }
+    // }
 };
 
 exports.processAsync =  co.wrap(function *(text, metadata, mahabhutaFuncs) {
 
     if (!mahabhutaFuncs || mahabhutaFuncs.length < 0) mahabhutaFuncs = [];
 
-	var cleanOrDirty = 'first-time';
+    var cleanOrDirty = 'first-time';
 
     // Allow a pre-parsed context to be passed in
     var $ = typeof text === 'function' ? text : exports.parse(text);
@@ -236,7 +236,7 @@ exports.processAsync =  co.wrap(function *(text, metadata, mahabhutaFuncs) {
 });
 
 exports.process1 = function(text, metadata, mahafunc, done) {
-	exports.process(text, metadata, [ mahafunc ], done);
+    exports.process(text, metadata, [ mahafunc ], done);
 };
 
 exports.builtin = require('./built-in');
