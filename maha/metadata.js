@@ -1,10 +1,14 @@
 'use strict';
 
-const mahabhuta = require('./index');
-const globfs    = require('globfs');
+const mahabhuta = require('../index');
 const co        = require('co');
 
-exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta built-in", {});
+// TODO JavaScript script tags
+// TODO some metadata like rel=canonical
+// TODO ograph && twitter cards
+// TODO bootstrap-specific -- responsive embed support
+
+exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta metadata built-in", {});
 
 class SiteVerification extends mahabhuta.CustomElement {
 	get elementName() { return "site-verification"; }
@@ -117,68 +121,3 @@ class BodyAddClass extends mahabhuta.Munger {
     }
 }
 exports.mahabhuta.addMahafunc(new BodyAddClass());
-
-
-const ejs      = require('ejs');
-
-class Partial extends mahabhuta.CustomElement {
-    get elementName() { return "partial"; }
-    process($element, metadata, dirty) {
-        return co(function* () {
-            var data  = $element.data();
-            var fname = $element.attr("file-name");
-            var body  = $element.html();
-
-            var d = {};
-            for (var mprop in metadata) { d[mprop] = metadata[mprop]; }
-            var data = $element.data();
-            for (var dprop in data) { d[dprop] = data[dprop]; }
-            d["partialBody"] = body;
-
-            // find the partial
-            // render the partial using the data provided
-
-            // TBD configuration for partialDirs
-            var partialFound = yield globfs.findAsync(module.exports.configuration.partialDirs, fname);
-            if (!partialFound) throw new Error(`No partial directory found for ${fname}`);
-            // Pick the first partial found
-            partialFound = partialFound[0];
-
-            var partialFname = path.join(partialFound.basedir, partialFound.path);
-            var partialText = yield fs.readFile(partialFname, 'utf8');
-
-            // TBD based on file extension render through a template engine
-            // TBD Need support for a broader spectrum of template engines
-
-            dirty();
-            if (/\.ejs$/i.test(partialFname)) {
-                try { return ejs.render(partialText, d); } catch (e) {
-                    throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
-                }
-            } else if (/\.html$/i.test(partialFname)) {
-                // NOTE: The partialBody gets lost in this case
-                return partialText;
-            } else {
-                throw new Error("No rendering support for ${fname}");
-            }
-
-            /* if (module.exports.configuration.renderPartial) {
-                dirty();
-                return yield module.exports.configuration.renderPartial(fname, body, d);
-            } else {
-                throw new Error(`CONFIGURATION ERROR: Unable to render partial ${fname}`);
-            } */
-        });
-    }
-}
-exports.mahabhuta.addMahafunc(new Partial());
-
-module.exports.configuration = {};
-
-// JavaScript script tags
-
-// some metadata like rel=canonical
-
-// ograph && twitter cards
-
-// bootstrap-specific -- responsive embed support

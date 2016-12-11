@@ -20,13 +20,14 @@
     "type": "git",
     "url": "https://github.com/akashacms/mahabhuta.git"
   },
-  "version": "0.6.1",
+  "version": "0.6.2",
   "engines": {
     "node": ">=6.0"
   },
   "dependencies": {
     "cheerio": ">=0.19.x",
     "async": "*",
-    "co": "*"
+    "co": "*",
+    "globfs": ">=0.2.2"
   }
 }

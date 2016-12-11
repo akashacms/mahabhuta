@@ -238,5 +238,3 @@ exports.processAsync =  co.wrap(function *(text, metadata, mahabhutaFuncs) {
 exports.process1 = function(text, metadata, mahafunc, done) {
     exports.process(text, metadata, [ mahafunc ], done);
 };
-
-exports.builtin = require('./built-in');
