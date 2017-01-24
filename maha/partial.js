@@ -46,6 +46,7 @@ module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
     if (!partialFound) throw new Error(`No partial directory found for ${fname}`);
     // Pick the first partial found
     partialFound = partialFound[0];
+    if (!partialFound) throw new Error(`No partial directory found for ${fname}`);
 
     var partialFname = path.join(partialFound.basedir, partialFound.path);
     // console.log(`doPartialAsync before reading ${partialFname}`);

@@ -54,8 +54,8 @@ class DNSPrefetch extends mahabhuta.CustomElement {
 exports.mahabhuta.addMahafunc(new DNSPrefetch());
 
 class XMLSitemap extends mahabhuta.CustomElement {
-	get elementName() { return "xml-sitemap"; }
-	process($element, metadata, dirty) {
+    get elementName() { return "xml-sitemap"; }
+    process($element, metadata, dirty) {
         return co(function* () {
             // http://microformats.org/wiki/rel-sitemap
             var href = $element.attr("href");
@@ -69,8 +69,8 @@ class XMLSitemap extends mahabhuta.CustomElement {
 exports.mahabhuta.addMahafunc(new XMLSitemap());
 
 class ExternalStylesheet extends mahabhuta.CustomElement {
-	get elementName() { return "external-stylesheet"; }
-	process($element, metadata, dirty) {
+    get elementName() { return "external-stylesheet"; }
+    process($element, metadata, dirty) {
         return co(function* () {
             var href = $element.attr('href');
             if (!href) throw new Error("No href supplied");
