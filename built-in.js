@@ -135,6 +135,8 @@ class Partial extends mahabhuta.CustomElement {
             for (var dprop in data) { d[dprop] = data[dprop]; }
             d["partialBody"] = body;
 
+            // console.log(`mahabhuta Partial partialBody=${partialBody}`);
+
             // find the partial
             // render the partial using the data provided
 

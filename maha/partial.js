@@ -24,6 +24,8 @@ class Partial extends mahabhuta.CustomElement {
             for (var dprop in data) { d[dprop] = data[dprop]; }
             d["partialBody"] = body;
 
+            // console.log(`mahabhuta Partial partialBody=${d["partialBody"]}`);
+
             dirty();
             return exports.doPartialAsync(fname, d);
 
@@ -40,7 +42,7 @@ module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
     // render the partial using the data provided
 
     // TBD configuration for partialDirs
-    // console.log(`doPartialAsync ${fname} ${util.inspect(attrs)} ${util.inspect(module.exports.configuration.partialDirs)}`);
+    // console.log(`doPartialAsync ${util.inspect(fname)} ${util.inspect(module.exports.configuration.partialDirs)}`);
     var partialFound = yield globfs.findAsync(module.exports.configuration.partialDirs, fname);
     // console.log(`doPartialAsync ${partialFound}`);
     if (!partialFound) throw new Error(`No partial directory found for ${fname}`);
