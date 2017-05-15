@@ -1,7 +1,7 @@
 ---
 layout: ebook-page.html.ejs
 title: Using Mahabhuta in an Express application
-bookHomeURL: '/toc.html'
+# bookHomeURL: 'toc.html'
 ---
 
 While Mahabhuta came into being as part of AkashaCMS, a static HTML website generator, DOM processing in a dynamically generated website should be very useful.  It's fairly easy to integrate Mahabhuta into Express as a "template engine".  While Mahabhuta's model is very unlike template engines, it does manipulate HTML to produce different HTML.  That makes it easy enough to fit Mahabhuta into Express as a template engine.

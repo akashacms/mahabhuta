@@ -1,7 +1,7 @@
 ---
 layout: ebook-page.html.ejs
 title: Processing HTML DOM with Mahabhuta's Mahafuncs
-bookHomeURL: '/toc.html'
+# bookHomeURL: 'toc.html'
 ---
 
 In the previous chapter we saw a simple one-element MahafuncArray.  We were told that when running `mahabhuta.process` we're to pass in a MahafuncArray object.  That's simple enough, right?  An array of Mahafunc objects, yes?  

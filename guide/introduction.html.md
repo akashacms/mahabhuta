@@ -1,7 +1,7 @@
 ---
 layout: ebook-page.html.ejs
 title: Introduction
-bookHomeURL: '/toc.html'
+# bookHomeURL: 'toc.html'
 ---
 
 Back in 2011 when I was first learning about Node.js, I came across a video/talk by an excited Yahoo engineer.  He talked about the awesome power of server-side DOM-based processing of HTML before sending the page to the browser.  The claim is that by doing most of the page assembly on the server overall performance is improved -- the server has better bandwidth to the supporting services to retrieve content to render, and therefore all the round-trips to gather that stuff runs more quickly on the server than in a browser.  Especially when that browser is in the middle of a farm field in the boondocks.

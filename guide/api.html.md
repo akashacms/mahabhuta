@@ -1,7 +1,7 @@
 ---
 layout: ebook-page.html.ejs
 title: Mahabhuta API
-bookHomeURL: '/toc.html'
+# bookHomeURL: 'toc.html'
 ---
 
 Details of the API

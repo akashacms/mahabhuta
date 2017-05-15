@@ -1,7 +1,7 @@
 ---
 layout: ebook-page.html.ejs
 title: Using the built-in Mahafuncs
-bookHomeURL: '/toc.html'
+# bookHomeURL: 'toc.html'
 ---
 
 Included with Mahabhuta is a small collection of useful Mahafunc's.  They serve both as an example of Mahafunc implementation, and as basic HTML manipulations to simplify your projects.
