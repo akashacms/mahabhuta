@@ -32,9 +32,14 @@ const co      = require('co');
 const fs      = require('fs');
 
 var configCheerio;
+var traceFlag = false;
 
 exports.config = function(_configCheerio) {
     configCheerio = _configCheerio;
+};
+
+exports.setTraceProcessing = function(_traceFlag) {
+    traceFlag = _traceFlag;
 };
 
 /**
@@ -155,20 +160,22 @@ exports.MahafuncArray = class MahafuncArray {
 
     process($, metadata, dirty) {
         var mhArray = this;
+        if (traceFlag)  console.log(`Mahabhuta starting array ${mhArray.name}`);
         return co(function *() {
             for (var mahafunc of mhArray._functions) {
                 if (mahafunc instanceof exports.CustomElement) {
-                    // console.log(`Mahabhuta calling CustomElement ${mahafunc.elementName}`);
+                    if (traceFlag) console.log(`Mahabhuta calling CustomElement ${mhArray.name} ${mahafunc.elementName}`);
                     yield mahafunc.processAll($, metadata, dirty);
                 } else if (mahafunc instanceof exports.Munger) {
-                    // console.log(`Mahabhuta calling Munger ${mahafunc.selector}`);
+                    if (traceFlag)  console.log(`Mahabhuta calling Munger ${mhArray.name} ${mahafunc.selector}`);
                     yield mahafunc.processAll($, metadata, dirty);
                 } else if (mahafunc instanceof exports.PageProcessor) {
-                    // console.log(`Mahabhuta calling PageProcessor `);
+                    if (traceFlag)  console.log(`Mahabhuta calling ${mhArray.name} PageProcessor `);
                     yield mahafunc.process($, metadata, dirty);
                 } else if (mahafunc instanceof exports.MahafuncArray) {
                     yield mahafunc.process($, metadata, dirty);
                 } else if (typeof mahafunc === 'function') {
+                    if (traceFlag)  console.log(`Mahabhuta calling an ${mhArray.name} "function" `);
                     yield new Promise((resolve, reject) => {
                         mahafunc($, metadata, dirty, err => {
                             if (err) reject(err);
@@ -192,20 +199,9 @@ exports.MahafuncArray = class MahafuncArray {
  * Process the text using functions supplied in the array mahabhutaFuncs.
  */
 exports.process = function(text, metadata, mahabhutaFuncs, done) {
-
     exports.processAsync(text, metadata, mahabhutaFuncs)
     .then(html => { done(undefined, html); })
     .catch(err => { done(err); });
-
-    // If we were on a Synchronous platform, this might be
-    //
-    // var cleanOrDirty = 'first-time';
-    // while (dirtyOrClean !== 'dirty' && dirtyOrClean !== 'first-time') {
-    // 		cleanOrDirty = 'clean';
-    //		mahabhutaFuncs.forEach(function(mahafunc) {
-    //			mahafunc($, metadata, setDirty, function(err) { ... });
-    //      }
-    // }
 };
 
 exports.processAsync =  co.wrap(function *(text, metadata, mahabhutaFuncs) {

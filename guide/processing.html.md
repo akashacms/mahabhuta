@@ -88,6 +88,55 @@ Both of these declare they work on the `<hello-world>` tag.  But when does the o
 
 One of those `<hello-world>` implementations will execute before the other.  The first one to execute replaces `<hello-world>` with its text.  When the second executes the tag is no longer there and the Mahafunc doesn't perform any work.
 
+## Determining which Mahafunc is failing
+
+This system of MahafuncArray's containing other MahafuncArray's is very flexible and efficient.  But certain failures in Mahafunc's can be extremely difficult to debug.  A Mahafunc that doesn't exit properly can simply cause AkashaRender to exit with no indication of the cause of the failure.  
+
+Mahabhuta allows you to trace the processing of MahafuncArray's and Mahafunc's.  If a Mahafunc fails incorrectly, it will be the last one printed by this tracing.  Or the tracing helps you audit the behavior of Mahabhuta in your application.
+
+Somewhere in your application call `mahabhuta.setTraceProcessing(true)` as so:
+
+```
+const mahabhuta = require('mahabhuta');
+mahabhuta.setTraceProcessing(true);
+```
+
+When set, the Mahabhuta processing loop will print this sort of tracing:
+
+```
+Mahabhuta starting array master
+Mahabhuta starting array inline
+Mahabhuta calling an inline "function"
+Mahabhuta starting array akashacms-base
+Mahabhuta calling CustomElement akashacms-base ak-page-title
+Mahabhuta calling CustomElement akashacms-base ak-header-metatags
+Mahabhuta calling CustomElement akashacms-base ak-sitemapxml
+Mahabhuta calling CustomElement akashacms-base ak-header-linkreltags
+Mahabhuta calling CustomElement akashacms-base ak-header-canonical-url
+Mahabhuta calling an akashacms-base "function"
+Mahabhuta calling CustomElement akashacms-base ak-google-analytics
+Mahabhuta calling CustomElement akashacms-base publication-date
+Mahabhuta calling an akashacms-base "function"
+Mahabhuta calling Munger akashacms-base html head open-graph-promote-images
+Mahabhuta calling an akashacms-base "function"
+Mahabhuta starting array inline
+Mahabhuta calling an inline "function"
+Mahabhuta starting array inline
+Mahabhuta calling an inline "function"
+Mahabhuta calling an inline "function"
+Mahabhuta starting array akashacms-document-viewers
+Mahabhuta calling CustomElement akashacms-document-viewers googledocs-viewer
+Mahabhuta calling CustomElement akashacms-document-viewers googledocs-view-link
+Mahabhuta calling CustomElement akashacms-document-viewers docviewer
+Mahabhuta calling CustomElement akashacms-document-viewers docviewer-link
+```
+
+Turning off the tracing is this simple:
+
+```
+mahabhuta.setTraceProcessing(false);
+```
+
 # The Mahafunc objects
 
 Currently there are two kinds of Mahafunc's, and a third type we might implement if it makes sense to do so.  We've already seen one, CustomElement, which is meant to process a single element in the DOM, replacing it with something else.  The other, Munger, is meant for wider-ranging changes to the DOM.
