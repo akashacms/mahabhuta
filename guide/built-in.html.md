@@ -1,12 +1,17 @@
 ---
 layout: ebook-page.html.ejs
 title: Using the built-in Mahafuncs
-# bookHomeURL: 'toc.html'
+publicationDate: July 1, 2017
 ---
 
 Included with Mahabhuta is a small collection of useful Mahafunc's.  They serve both as an example of Mahafunc implementation, and as basic HTML manipulations to simplify your projects.
 
-The MahafuncArray for these built-in Mahafuncs is available as `mahabhuta.builtin.mahabhuta`.  
+The MahafuncArray for these built-in Mahafuncs is available as:
+
+```
+const mahaMetadata = require('mahabhuta/maha/metadata');
+const mahaPartial = require('mahabhuta/maha/partial');
+```
 
 Typically you'll have a master MahafuncArray containing other MahafuncArray instances for each group of Mahafunc's.  The Mahabhuta built-in MahafuncArray should be the last in the master list.
 
@@ -15,7 +20,8 @@ var mahamaster = new mahabhuta.MahafuncArray("master", {});
 mahamaster.addMahafunc(group1.mahabhuta);
 mahamaster.addMahafunc(group2.mahabhuta);
 mahamaster.addMahafunc(group3.mahabhuta);
-mahamaster.addMahafunc(mahabhuta.builtin.mahabhuta);
+mahamaster.addMahafunc(mahaMetadata.mahabhuta);
+mahamaster.addMahafunc(mahaPartial.mahabhuta);
 ```
 
 This is to ensure we take advantage of the over-rideability principle.
@@ -94,6 +100,12 @@ USAGE:
 
 # Partial's -- partial
 
+Instantiate it with:
+
+```
+const mahaPartial = require('mahabhuta/maha/partial');
+```
+
 The Partial concept is very powerful, since it lets you substitute a large piece of template into one location on the page.  For example you might have boilerplate code that's replicated on every page, such as the group of JavaScript and CSS references, or a navigation toolbar that's the same on every page.  By using a Partial you can avoid replicating that code, and instead keep it in one place.
 
 Implementation is a little more complex than for the other tags, as it will require hooking in some code to find the template file.
@@ -108,17 +120,16 @@ body content of the partial
 
 The `data-` attributes are made available to the Partial as part of the metadata object.  That is, when `mahabhuta.process` is called, you are to supply a metadata object which can have multiple values.  The `data-` attributes are added to the metadata object, and then supplied to the template file.  The body content is also added to the metadata as `metadata.partialBody`.
 
-What, then, does that mean that the metadata is supplied to the template file?
+What, then, does that mean that the metadata is supplied to the template file?  If the partial's file name ends in `.ejs` then it is rendered through EJS, which does value substitution.
 
-The answer to that depends on how you implement the next required step to using the `<partial>` tag.  Out of the box `<partial>` will not work, and it instead relies on hooking in code to assist finding the partial file.
+The directories it searches for partial's depends on the `configuration.partialDirs` array exported by this module.  For example this function coordinates a list of Partial directories:
 
 ```
-mahabhuta.builtin.configuration.renderPartial = function(fname, body, data) {
-};
+addPartialsDir(dir) {
+   if (!mahaPartial.configuration.partialDirs) {
+       mahaPartial.configuration.partialDirs = [];
+   }
+   mahaPartial.configuration.partialDirs.push(dir);
+   return this;
+}
 ```
-
-The `<partial>` tag looks for this function, and calls it.  That function is to supply a Promise, and if that Promise resolve's correctly its value is substituted into the HTML in place of the `<partial>` tag.
-
-The parameters for the `renderPartial` function are straight-forward.  The `file-name` attribute is supplied in the `fname` parameter, the body content is supplied in the `body` parameter, and the computed metadata object is supplied as `data`.
-
-The result of this depends on the function connected here.  Your function may simply read in an HTML file, or it could render it through a template engine.  In AkashaCMS, the `file-name` can be like `navigation.html.ejs` to indicate the EJS engine is used.  Obviously using a template engine brings with it the capability to substitute metadata values into the text.
