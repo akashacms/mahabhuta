@@ -107,7 +107,15 @@ exports.Munger = class Munger extends exports.Mahafunc {
         throw new Error("The 'process' function must be overridden")
     }
     processAll($, metadata, setDirty) {
+
         var munger = this;
+        var elements = munger.findElements($);
+        if (elements.length <= 0) return Promise.resolve();
+        return Promise.all(elements.map(element => {
+            return munger.process($, $(element), metadata, setDirty);
+        }));
+
+        /* var munger = this;
         return co(function *() {
             try {
                 var elements = munger.findElements($);
@@ -119,7 +127,7 @@ exports.Munger = class Munger extends exports.Mahafunc {
                 console.error(`Munger ${munger.selector} Errored with ${util.inspect(e)}`);
                 throw e;
             }
-        });
+        }); */
     }
 }
 
@@ -169,6 +177,7 @@ exports.MahafuncArray = class MahafuncArray {
                 } else if (mahafunc instanceof exports.Munger) {
                     if (traceFlag)  console.log(`Mahabhuta calling Munger ${mhArray.name} ${mahafunc.selector}`);
                     yield mahafunc.processAll($, metadata, dirty);
+                    if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${mhArray.name} ${mahafunc.selector}`);
                 } else if (mahafunc instanceof exports.PageProcessor) {
                     if (traceFlag)  console.log(`Mahabhuta calling ${mhArray.name} PageProcessor `);
                     yield mahafunc.process($, metadata, dirty);
