@@ -6,7 +6,7 @@ const co        = require('co');
 const ejs       = require('ejs');
 const path      = require('path');
 const util      = require('util');
-const fs        = require('fs-extra-promise');
+const fs        = require('fs-extra');
 
 exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta partials built-in", {});
 
@@ -52,16 +52,11 @@ module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
 
     var partialFname = path.join(partialFound.basedir, partialFound.path);
     // console.log(`doPartialAsync before reading ${partialFname}`);
-    var stats = yield new Promise((resolve, reject) => {
-        fs.stat(partialFname, (err, stats) => {
-            if (err) reject(err);
-            else resolve(stats);
-        });
-    });
+    var stats = yield fs.stat(partialFname);
     if (!stats.isFile()) {
         throw new Error(`doPartialAsync non-file found for ${fname} - ${partialFname}`);
     }
-    var partialText = yield fs.readFileAsync(partialFname, 'utf8');
+    var partialText = yield fs.readFile(partialFname, 'utf8');
     // console.log(`doPartialAsync after reading ${partialFname} text length=${partialText.length}`);
 
     // TODO based on file extension render through a template engine
