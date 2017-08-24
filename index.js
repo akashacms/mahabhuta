@@ -27,7 +27,6 @@
 
 const cheerio = require('cheerio');
 const util    = require('util');
-const async   = require('async');
 const co      = require('co');
 const fs      = require('fs');
 
