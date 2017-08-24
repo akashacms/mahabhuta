@@ -41,13 +41,23 @@ module.exports.configuration = {
 
     // Replaceable function to handle rendering
     renderPartial: co.wrap(function* (fname, attrs) {
+        
+        let partialDirs;
 
-        var partialFound = yield globfs.findAsync(module.exports.configuration.partialDirs, fname);
-        if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(module.exports.configuration.partialDirs)}`);
+        if (typeof module.exports.configuration.partialDirs === 'undefined'
+         || !module.exports.configuration.partialDirs
+         || module.exports.configuration.partialDirs.length <= 0) {
+            partialDirs = [ __dirname ];
+         } else {
+            partialDirs = module.exports.configuration.partialDirs;
+         }
+
+        var partialFound = yield globfs.findAsync(partialDirs, fname);
+        if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
         // Pick the first partial found
         partialFound = partialFound[0];
         // console.log(`module.exports.configuration renderPartial ${partialFound}`);
-        if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(module.exports.configuration.partialDirs)}`);
+        if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
     
         var partialFname = path.join(partialFound.basedir, partialFound.path);
         var stats = yield fs.stat(partialFname);
