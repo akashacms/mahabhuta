@@ -27,14 +27,46 @@ class Partial extends mahabhuta.CustomElement {
             // console.log(`mahabhuta Partial partialBody=${d["partialBody"]}`);
 
             dirty();
-            return exports.doPartialAsync(fname, d);
+
+            return module.exports.configuration.renderPartial(fname, d);
 
         });
     }
 }
+
 module.exports.mahabhuta.addMahafunc(new Partial());
 
-module.exports.configuration = {};
+module.exports.configuration = {
+    partialDirs: [], 
+
+    // Replaceable function to handle rendering
+    renderPartial: co.wrap(function* (fname, attrs) {
+
+        var partialFound = yield globfs.findAsync(module.exports.configuration.partialDirs, fname);
+        if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(module.exports.configuration.partialDirs)}`);
+        // Pick the first partial found
+        partialFound = partialFound[0];
+        // console.log(`module.exports.configuration renderPartial ${partialFound}`);
+        if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(module.exports.configuration.partialDirs)}`);
+    
+        var partialFname = path.join(partialFound.basedir, partialFound.path);
+        var stats = yield fs.stat(partialFname);
+        if (!stats.isFile()) {
+            throw new Error(`doPartialAsync non-file found for ${fname} - ${partialFname}`);
+        }
+        var partialText = yield fs.readFile(partialFname, 'utf8');
+        if (/\.ejs$/i.test(partialFname)) {
+            try { return ejs.render(partialText, attrs); } catch (e) {
+                throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
+            }
+        } else if (/\.html$/i.test(partialFname)) {
+            // NOTE: The partialBody gets lost in this case
+            return partialText;
+        } else {
+            throw new Error("No rendering support for ${fname}");
+        }
+    })
+};
 
 module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
 
