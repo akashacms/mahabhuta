@@ -243,7 +243,7 @@ As before, the `process` function is to return a Promise.  Unlike CustomElement,
 
 What you do within the `process` method is up to you.  Have fun.
 
-## A warning about dirty() infinite loops
+## A warning about `dirty()` infinite loops
 
 It's quite possible to lead Mahabhuta into an infinite loop:
 

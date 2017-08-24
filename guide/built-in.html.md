@@ -104,6 +104,8 @@ Instantiate it with:
 
 ```
 const mahaPartial = require('mahabhuta/maha/partial');
+...
+mahamaster.addMahafunc(mahaPartial.mahabhuta);
 ```
 
 The Partial concept is very powerful, since it lets you substitute a large piece of template into one location on the page.  For example you might have boilerplate code that's replicated on every page, such as the group of JavaScript and CSS references, or a navigation toolbar that's the same on every page.  By using a Partial you can avoid replicating that code, and instead keep it in one place.
@@ -118,18 +120,19 @@ body content of the partial
 </partial>
 ```
 
-The `data-` attributes are made available to the Partial as part of the metadata object.  That is, when `mahabhuta.process` is called, you are to supply a metadata object which can have multiple values.  The `data-` attributes are added to the metadata object, and then supplied to the template file.  The body content is also added to the metadata as `metadata.partialBody`.
+The file named in `file-name` is the _partial_ which is invoked, and once it's rendered the resulting HTML is substituted for the tag.  While this can be run standalone, this feature can be integrated into a larger system.
 
-What, then, does that mean that the metadata is supplied to the template file?  If the partial's file name ends in `.ejs` then it is rendered through EJS, which does value substitution.
+**Collecting Metdata** This first step creates a new metadata object, merging data from the `metadata` passed in through Mahabhuta with the value of `data-` attributes in the tag.  The `data-` attributes are a universal feature in HTML supplying data values.  Inside the `partial` Mahafunc, the `$element.data()` function is called to gather those items and to merge them into the `metadata`.
 
-The directories it searches for partial's depends on the `configuration.partialDirs` array exported by this module.  For example this function coordinates a list of Partial directories:
+**Partial Body** Text content of the tag is collected with `$element.html()`, and appears in the `metadata` in the `partialBody` field.
 
-```
-addPartialsDir(dir) {
-   if (!mahaPartial.configuration.partialDirs) {
-       mahaPartial.configuration.partialDirs = [];
-   }
-   mahaPartial.configuration.partialDirs.push(dir);
-   return this;
-}
-```
+**Rendering the Partial** The point of collecting metadata and the `partialBody` is to render the _partial_ using a template engine.  The metadata can be substituted into the _partial_ as dictated by the template.  The example `file-name` above, `partial.html`, would not be processed by a template engine, however, and would simply be what replaces the tag.  There are two methods to render the _partial_ through a template engine, one uses the default built-in renderer, and the other uses an external renderer.
+
+**Default internal Partial renderer** With no further configuration the file named in `file-name` is looked for in the current directory.  Files ending in `.ejs` are rendered using the EJS template engine.  Files ending in `.html` are used intact with no modifications.  In either case the resulting HTML is substituted for the tag.  If the file ends in any other extension, an error is thrown.
+
+**Supplying a list of directories to search in** It's possible to set up an array of directories to search for the _partial_ file.  Make `mahaPartial.configuration.partialDirs` an array giving directory names to earch, and the first one found will be used.
+
+**Configuring an external Partial renderer** The above method is powerful but limited.  What if you want to use other template engines, or to use Markdown or Asciidoc in your _Partial_?  A generalized rendering process for Partial's is best handled by an external Renderer.  For example Mahabhuta's sister project, AkashaRender, supplies a rendering process exploiting its Renderer objects.  
+
+To integrate your own rendering process, overwrite the `mahaPartial.configuration.renderPartial` function with your own.  The function signature is `(fname, attrs)` where `fname` is the file passed in `file-name` and `attrs` is the merged metadata object.  The function must return a Promise that when fulfilled produces the rendered HTML.
+
