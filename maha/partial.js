@@ -80,6 +80,8 @@ module.exports.configuration = {
 
 module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
 
+    throw new Error("Deprecated");
+
     // find the partial
     // render the partial using the data provided
 
@@ -119,6 +121,8 @@ module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
 
 
 module.exports.doPartialSync = function(fname, attrs) {
+    throw new Error("Deprecated");
+
     var partialFound = globfs.findSync(module.exports.configuration.partialDirs, fname);
     if (!partialFound) throw new Error(`No partial directory found for ${fname}`);
     // Pick the first partial found
