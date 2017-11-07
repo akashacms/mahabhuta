@@ -27,8 +27,7 @@
 
 const cheerio = require('cheerio');
 const util    = require('util');
-const co      = require('co');
-const fs      = require('fs');
+const fs      = require('fs-extra');
 
 var configCheerio;
 var traceFlag = false;
@@ -77,21 +76,19 @@ exports.CustomElement = class CustomElement extends exports.Mahafunc {
         throw new Error("The 'process' function must be overridden");
     }
 
-    processAll($, metadata, setDirty) {
+    async processAll($, metadata, setDirty) {
         var custom = this;
-        return co(function *() {
-            try {
-                var elements = custom.findElements($);
-                if (elements.length <= 0) return;
-                for (var element of elements) {
-                    let replaceWith = yield custom.process($(element), metadata, setDirty);
-                    $(element).replaceWith(replaceWith);
-                }
-            } catch (e) {
-                console.error(`CustomElement ${custom.elementName} Errored with ${util.inspect(e)}`);
-                throw e;
+        try {
+            var elements = custom.findElements($);
+            if (elements.length <= 0) return;
+            for (var element of elements) {
+                let replaceWith = await custom.process($(element), metadata, setDirty);
+                $(element).replaceWith(replaceWith);
             }
-        });
+        } catch (e) {
+            console.error(`CustomElement ${custom.elementName} Errored with ${util.inspect(e)}`);
+            throw e;
+        }
     }
 }
 
@@ -105,7 +102,7 @@ exports.Munger = class Munger extends exports.Mahafunc {
     process($, $element, metadata, setDirty, done) {
         throw new Error("The 'process' function must be overridden")
     }
-    processAll($, metadata, setDirty) {
+    async processAll($, metadata, setDirty) {
         var munger = this;
         var elements = munger.findElements($);
         if (elements.length <= 0) return Promise.resolve();
@@ -150,41 +147,39 @@ exports.MahafuncArray = class MahafuncArray {
         }
     }
 
-    process($, metadata, dirty) {
+    async process($, metadata, dirty) {
         var mhArray = this;
         if (traceFlag)  console.log(`Mahabhuta starting array ${mhArray.name}`);
-        return co(function *() {
-            for (var mahafunc of mhArray._functions) {
-                if (mahafunc instanceof exports.CustomElement) {
-                    if (traceFlag) console.log(`Mahabhuta calling CustomElement ${mhArray.name} ${mahafunc.elementName}`);
-                    yield mahafunc.processAll($, metadata, dirty);
-                } else if (mahafunc instanceof exports.Munger) {
-                    if (traceFlag)  console.log(`Mahabhuta calling Munger ${mhArray.name} ${mahafunc.selector}`);
-                    yield mahafunc.processAll($, metadata, dirty);
-                    if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${mhArray.name} ${mahafunc.selector}`);
-                } else if (mahafunc instanceof exports.PageProcessor) {
-                    if (traceFlag)  console.log(`Mahabhuta calling ${mhArray.name} PageProcessor `);
-                    yield mahafunc.process($, metadata, dirty);
-                } else if (mahafunc instanceof exports.MahafuncArray) {
-                    yield mahafunc.process($, metadata, dirty);
-                } else if (typeof mahafunc === 'function') {
-                    if (traceFlag)  console.log(`Mahabhuta calling an ${mhArray.name} "function" `);
-                    yield new Promise((resolve, reject) => {
-                        mahafunc($, metadata, dirty, err => {
-                            if (err) reject(err);
-                            else resolve();
-                        });
+        for (var mahafunc of mhArray._functions) {
+            if (mahafunc instanceof exports.CustomElement) {
+                if (traceFlag) console.log(`Mahabhuta calling CustomElement ${mhArray.name} ${mahafunc.elementName}`);
+                await mahafunc.processAll($, metadata, dirty);
+            } else if (mahafunc instanceof exports.Munger) {
+                if (traceFlag)  console.log(`Mahabhuta calling Munger ${mhArray.name} ${mahafunc.selector}`);
+                await mahafunc.processAll($, metadata, dirty);
+                if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${mhArray.name} ${mahafunc.selector}`);
+            } else if (mahafunc instanceof exports.PageProcessor) {
+                if (traceFlag)  console.log(`Mahabhuta calling ${mhArray.name} PageProcessor `);
+                await mahafunc.process($, metadata, dirty);
+            } else if (mahafunc instanceof exports.MahafuncArray) {
+                await mahafunc.process($, metadata, dirty);
+            } else if (typeof mahafunc === 'function') {
+                if (traceFlag)  console.log(`Mahabhuta calling an ${mhArray.name} "function" `);
+                await new Promise((resolve, reject) => {
+                    mahafunc($, metadata, dirty, err => {
+                        if (err) reject(err);
+                        else resolve();
                     });
-                } else if (Array.isArray(mahafunc)) {
-                    let mhObj = new exports.MahafuncArray("inline", mhArray._config);
-                    mhObj.setMahafuncArray(mahafunc);
-                    yield mhObj.process($, metadata, dirty);
-                } else {
-                    console.error("BAD MAHAFUNC "+ util.inspect(mahafunc));
-                }
+                });
+            } else if (Array.isArray(mahafunc)) {
+                let mhObj = new exports.MahafuncArray("inline", mhArray._config);
+                mhObj.setMahafuncArray(mahafunc);
+                await mhObj.process($, metadata, dirty);
+            } else {
+                console.error("BAD MAHAFUNC "+ util.inspect(mahafunc));
             }
-            return $.html();
-        });
+        }
+        return $.html();
     }
 }
 
@@ -197,7 +192,7 @@ exports.process = function(text, metadata, mahabhutaFuncs, done) {
     .catch(err => { done(err); });
 };
 
-exports.processAsync =  co.wrap(function *(text, metadata, mahabhutaFuncs) {
+exports.processAsync =  async function(text, metadata, mahabhutaFuncs) {
 
     if (!mahabhutaFuncs || mahabhutaFuncs.length < 0) mahabhutaFuncs = [];
 
@@ -218,11 +213,11 @@ exports.processAsync =  co.wrap(function *(text, metadata, mahabhutaFuncs) {
         } else throw new Error(`Bad mahabhutaFuncs object supplied`);
 
         cleanOrDirty = 'clean';
-        yield mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; });
+        await mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; });
     } while (cleanOrDirty === 'dirty');
 
     return $.html();
-});
+};
 
 exports.process1 = function(text, metadata, mahafunc, done) {
     exports.process(text, metadata, [ mahafunc ], done);

@@ -2,7 +2,6 @@
 
 const mahabhuta = require('../index');
 const globfs    = require('globfs');
-const co        = require('co');
 const ejs       = require('ejs');
 const path      = require('path');
 const util      = require('util');
@@ -12,25 +11,22 @@ exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta partials built-in", {
 
 class Partial extends mahabhuta.CustomElement {
     get elementName() { return "partial"; }
-    process($element, metadata, dirty) {
-        return co(function* () {
-            var data  = $element.data();
-            var fname = $element.attr("file-name");
-            var body  = $element.html();
+    async process($element, metadata, dirty) {
+        var data  = $element.data();
+        var fname = $element.attr("file-name");
+        var body  = $element.html();
 
-            var d = {};
-            for (var mprop in metadata) { d[mprop] = metadata[mprop]; }
-            var data = $element.data();
-            for (var dprop in data) { d[dprop] = data[dprop]; }
-            d["partialBody"] = body;
+        var d = {};
+        for (var mprop in metadata) { d[mprop] = metadata[mprop]; }
+        var data = $element.data();
+        for (var dprop in data) { d[dprop] = data[dprop]; }
+        d["partialBody"] = body;
 
-            // console.log(`mahabhuta Partial partialBody=${d["partialBody"]}`);
+        // console.log(`mahabhuta Partial partialBody=${d["partialBody"]}`);
 
-            dirty();
+        dirty();
 
-            return module.exports.configuration.renderPartial(fname, d);
-
-        });
+        return module.exports.configuration.renderPartial(fname, d);
     }
 }
 
@@ -40,7 +36,7 @@ module.exports.configuration = {
     partialDirs: [], 
 
     // Replaceable function to handle rendering
-    renderPartial: co.wrap(function* (fname, attrs) {
+    renderPartial: async function (fname, attrs) {
         
         let partialDirs;
 
@@ -52,7 +48,7 @@ module.exports.configuration = {
             partialDirs = module.exports.configuration.partialDirs;
          }
 
-        var partialFound = yield globfs.findAsync(partialDirs, fname);
+        var partialFound = await globfs.findAsync(partialDirs, fname);
         if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
         // Pick the first partial found
         partialFound = partialFound[0];
@@ -60,11 +56,11 @@ module.exports.configuration = {
         if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
     
         var partialFname = path.join(partialFound.basedir, partialFound.path);
-        var stats = yield fs.stat(partialFname);
+        var stats = await fs.stat(partialFname);
         if (!stats.isFile()) {
             throw new Error(`doPartialAsync non-file found for ${fname} - ${partialFname}`);
         }
-        var partialText = yield fs.readFile(partialFname, 'utf8');
+        var partialText = await fs.readFile(partialFname, 'utf8');
         if (/\.ejs$/i.test(partialFname)) {
             try { return ejs.render(partialText, attrs); } catch (e) {
                 throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
@@ -75,10 +71,10 @@ module.exports.configuration = {
         } else {
             throw new Error("No rendering support for ${fname}");
         }
-    })
+    }
 };
 
-module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
+module.exports.doPartialAsync = async function (fname, attrs) {
 
     throw new Error("Deprecated");
 
@@ -87,7 +83,7 @@ module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
 
     // TBD configuration for partialDirs
     // console.log(`doPartialAsync ${util.inspect(fname)} ${util.inspect(module.exports.configuration.partialDirs)}`);
-    var partialFound = yield globfs.findAsync(module.exports.configuration.partialDirs, fname);
+    var partialFound = await globfs.findAsync(module.exports.configuration.partialDirs, fname);
     // console.log(`doPartialAsync ${partialFound}`);
     if (!partialFound) throw new Error(`No partial directory found for ${fname}`);
     // Pick the first partial found
@@ -96,11 +92,11 @@ module.exports.doPartialAsync = co.wrap(function* (fname, attrs) {
 
     var partialFname = path.join(partialFound.basedir, partialFound.path);
     // console.log(`doPartialAsync before reading ${partialFname}`);
-    var stats = yield fs.stat(partialFname);
+    var stats = await fs.stat(partialFname);
     if (!stats.isFile()) {
         throw new Error(`doPartialAsync non-file found for ${fname} - ${partialFname}`);
     }
-    var partialText = yield fs.readFile(partialFname, 'utf8');
+    var partialText = await fs.readFile(partialFname, 'utf8');
     // console.log(`doPartialAsync after reading ${partialFname} text length=${partialText.length}`);
 
     // TODO based on file extension render through a template engine

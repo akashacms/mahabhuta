@@ -2,7 +2,6 @@
 
 const mahabhuta = require('./index');
 const globfs    = require('globfs');
-const co        = require('co');
 
 exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta built-in", {});
 
