@@ -113,7 +113,7 @@ module.exports.doPartialAsync = async function (fname, attrs) {
     } else {
         throw new Error("No rendering support for ${fname}");
     }
-});
+};
 
 
 module.exports.doPartialSync = function(fname, attrs) {
