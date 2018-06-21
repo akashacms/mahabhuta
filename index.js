@@ -153,24 +153,49 @@ exports.MahafuncArray = class MahafuncArray {
         for (var mahafunc of mhArray._functions) {
             if (mahafunc instanceof exports.CustomElement) {
                 if (traceFlag) console.log(`Mahabhuta calling CustomElement ${mhArray.name} ${mahafunc.elementName}`);
-                await mahafunc.processAll($, metadata, dirty);
+                try {
+                    await mahafunc.processAll($, metadata, dirty);
+                } catch (errCustom) {
+                    errCustom.message = `Mahabhuta ${mhArray.name} caught error in CustomElement: ${errCustom.message}`;
+                    throw errCustom;
+                }
             } else if (mahafunc instanceof exports.Munger) {
                 if (traceFlag)  console.log(`Mahabhuta calling Munger ${mhArray.name} ${mahafunc.selector}`);
-                await mahafunc.processAll($, metadata, dirty);
+                try {
+                    await mahafunc.processAll($, metadata, dirty);
+                } catch (errMunger) {
+                    errMunger.message = `Mahabhuta ${mhArray.name} caught error in Munger: ${errMunger.message}`;
+                    throw errMunger;
+                }
                 if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${mhArray.name} ${mahafunc.selector}`);
             } else if (mahafunc instanceof exports.PageProcessor) {
                 if (traceFlag)  console.log(`Mahabhuta calling ${mhArray.name} PageProcessor `);
-                await mahafunc.process($, metadata, dirty);
+                try {
+                    await mahafunc.process($, metadata, dirty);
+                } catch (errPageProcessor) {
+                    errPageProcessor.message = `Mahabhuta ${mhArray.name} caught error in PageProcessor: ${errPageProcessor.message}`;
+                    throw errPageProcessor;
+                }
             } else if (mahafunc instanceof exports.MahafuncArray) {
-                await mahafunc.process($, metadata, dirty);
+                try {
+                    await mahafunc.process($, metadata, dirty);
+                } catch (errMahafuncArray) {
+                    errMahafuncArray.message = `Mahabhuta ${mhArray.name} caught error in MahafuncArray: ${errMahafuncArray.message}`;
+                    throw errMahafuncArray;
+                }
             } else if (typeof mahafunc === 'function') {
                 if (traceFlag)  console.log(`Mahabhuta calling an ${mhArray.name} "function" `);
-                await new Promise((resolve, reject) => {
-                    mahafunc($, metadata, dirty, err => {
-                        if (err) reject(err);
-                        else resolve();
+                try {
+                    await new Promise((resolve, reject) => {
+                        mahafunc($, metadata, dirty, err => {
+                            if (err) reject(err);
+                            else resolve();
+                        });
                     });
-                });
+                } catch (errFunction) {
+                    errFunction.message = `Mahabhuta ${mhArray.name} caught error in function: ${errFunction.message}`;
+                    throw errFunction;
+                }
             } else if (Array.isArray(mahafunc)) {
                 let mhObj = new exports.MahafuncArray("inline", mhArray._config);
                 mhObj.setMahafuncArray(mahafunc);
