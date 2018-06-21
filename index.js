@@ -156,16 +156,14 @@ exports.MahafuncArray = class MahafuncArray {
                 try {
                     await mahafunc.processAll($, metadata, dirty);
                 } catch (errCustom) {
-                    errCustom.message = `Mahabhuta ${mhArray.name} caught error in CustomElement: ${errCustom.message}`;
-                    throw errCustom;
+                    throw new Error(`Mahabhuta ${mhArray.name} caught error in CustomElement: ${errCustom.message}`);
                 }
             } else if (mahafunc instanceof exports.Munger) {
                 if (traceFlag)  console.log(`Mahabhuta calling Munger ${mhArray.name} ${mahafunc.selector}`);
                 try {
                     await mahafunc.processAll($, metadata, dirty);
                 } catch (errMunger) {
-                    errMunger.message = `Mahabhuta ${mhArray.name} caught error in Munger: ${errMunger.message}`;
-                    throw errMunger;
+                    throw new Error(`Mahabhuta ${mhArray.name} caught error in Munger: ${errMunger.message}`);
                 }
                 if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${mhArray.name} ${mahafunc.selector}`);
             } else if (mahafunc instanceof exports.PageProcessor) {
@@ -173,15 +171,13 @@ exports.MahafuncArray = class MahafuncArray {
                 try {
                     await mahafunc.process($, metadata, dirty);
                 } catch (errPageProcessor) {
-                    errPageProcessor.message = `Mahabhuta ${mhArray.name} caught error in PageProcessor: ${errPageProcessor.message}`;
-                    throw errPageProcessor;
+                    throw new Error(`Mahabhuta ${mhArray.name} caught error in PageProcessor: ${errPageProcessor.message}`);
                 }
             } else if (mahafunc instanceof exports.MahafuncArray) {
                 try {
                     await mahafunc.process($, metadata, dirty);
                 } catch (errMahafuncArray) {
-                    errMahafuncArray.message = `Mahabhuta ${mhArray.name} caught error in MahafuncArray: ${errMahafuncArray.message}`;
-                    throw errMahafuncArray;
+                    throw new Error(`Mahabhuta ${mhArray.name} caught error in MahafuncArray: ${errMahafuncArray.message}`);
                 }
             } else if (typeof mahafunc === 'function') {
                 if (traceFlag)  console.log(`Mahabhuta calling an ${mhArray.name} "function" `);
@@ -193,8 +189,7 @@ exports.MahafuncArray = class MahafuncArray {
                         });
                     });
                 } catch (errFunction) {
-                    errFunction.message = `Mahabhuta ${mhArray.name} caught error in function: ${errFunction.message}`;
-                    throw errFunction;
+                    throw new Error(`Mahabhuta ${mhArray.name} caught error in function: ${errFunction.message}`);
                 }
             } else if (Array.isArray(mahafunc)) {
                 let mhObj = new exports.MahafuncArray("inline", mhArray._config);
