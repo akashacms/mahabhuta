@@ -221,6 +221,8 @@ exports.processAsync =  async function(text, metadata, mahabhutaFuncs) {
     // Allow a pre-parsed context to be passed in
     var $ = typeof text === 'function' ? text : exports.parse(text);
 
+    const loops = [];
+    const startProcessing = new Date();
     do {
         var mhObj;
         if (Array.isArray(mahabhutaFuncs)) {
@@ -234,7 +236,11 @@ exports.processAsync =  async function(text, metadata, mahabhutaFuncs) {
 
         cleanOrDirty = 'clean';
         await mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; });
+
+        loops.push(`MAHABHUTA processAsync ${metadata.document.path} FINISH ${(new Date() - startProcessing) / 1000} seconds`);
     } while (cleanOrDirty === 'dirty');
+
+    console.log(util.inspect(loops));
 
     return $.html();
 };
