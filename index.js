@@ -238,10 +238,10 @@ exports.processAsync =  async function(text, metadata, mahabhutaFuncs) {
         cleanOrDirty = 'clean';
         await mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; });
 
-        loops.push(`MAHABHUTA processAsync ${metadata.document.path} FINISH ${(new Date() - startProcessing) / 1000} seconds`);
+        // loops.push(`MAHABHUTA processAsync ${metadata.document.path} FINISH ${(new Date() - startProcessing) / 1000} seconds`);
     } while (cleanOrDirty === 'dirty');
 
-    console.log(util.inspect(loops));
+    // console.log(util.inspect(loops));
 
     return $.html();
 };
