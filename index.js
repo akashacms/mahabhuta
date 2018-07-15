@@ -199,7 +199,8 @@ exports.MahafuncArray = class MahafuncArray {
                 console.error("BAD MAHAFUNC "+ util.inspect(mahafunc));
             }
         }
-        return $.html();
+        // return $.html();
+        return $;
     }
 }
 
