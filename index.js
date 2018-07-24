@@ -150,6 +150,8 @@ exports.MahafuncArray = class MahafuncArray {
     async process($, metadata, dirty) {
         var mhArray = this;
         if (traceFlag)  console.log(`Mahabhuta starting array ${mhArray.name}`);
+        const loops = [];
+        const startProcessing = new Date();
         for (var mahafunc of mhArray._functions) {
             if (mahafunc instanceof exports.CustomElement) {
                 if (traceFlag) console.log(`Mahabhuta calling CustomElement ${mhArray.name} ${mahafunc.elementName}`);
@@ -158,6 +160,7 @@ exports.MahafuncArray = class MahafuncArray {
                 } catch (errCustom) {
                     throw new Error(`Mahabhuta ${mhArray.name} caught error in CustomElement: ${errCustom.message}`);
                 }
+                loops.push(`... CustomElement ${mahafunc.elementName} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.Munger) {
                 if (traceFlag)  console.log(`Mahabhuta calling Munger ${mhArray.name} ${mahafunc.selector}`);
                 try {
@@ -166,6 +169,7 @@ exports.MahafuncArray = class MahafuncArray {
                     throw new Error(`Mahabhuta ${mhArray.name} caught error in Munger: ${errMunger.message}`);
                 }
                 if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${mhArray.name} ${mahafunc.selector}`);
+                loops.push(`... Munger ${mahafunc.selector} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.PageProcessor) {
                 if (traceFlag)  console.log(`Mahabhuta calling ${mhArray.name} PageProcessor `);
                 try {
@@ -173,12 +177,17 @@ exports.MahafuncArray = class MahafuncArray {
                 } catch (errPageProcessor) {
                     throw new Error(`Mahabhuta ${mhArray.name} caught error in PageProcessor: ${errPageProcessor.message}`);
                 }
+                loops.push(`... PageProcessor ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.MahafuncArray) {
+                let results = [];
                 try {
-                    await mahafunc.process($, metadata, dirty);
+                    results = await mahafunc.process($, metadata, dirty);
                 } catch (errMahafuncArray) {
                     throw new Error(`Mahabhuta ${mhArray.name} caught error in MahafuncArray: ${errMahafuncArray.message}`);
                 }
+
+                results.forEach(result => { loops.push(`    ... "${mahafunc.name} result" ${result} ${(new Date() - startProcessing) / 1000} seconds`); });
+                loops.push(`... MahafuncArray ${mahafunc.name} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (typeof mahafunc === 'function') {
                 if (traceFlag)  console.log(`Mahabhuta calling an ${mhArray.name} "function" `);
                 try {
@@ -191,16 +200,19 @@ exports.MahafuncArray = class MahafuncArray {
                 } catch (errFunction) {
                     throw new Error(`Mahabhuta ${mhArray.name} caught error in function: ${errFunction.message}`);
                 }
+                loops.push(`... MahafuncArray "function" ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (Array.isArray(mahafunc)) {
                 let mhObj = new exports.MahafuncArray("inline", mhArray._config);
                 mhObj.setMahafuncArray(mahafunc);
-                await mhObj.process($, metadata, dirty);
+                let results = await mhObj.process($, metadata, dirty);
+                results.forEach(result => { loops.push(`    ... "inline result" ${result} ${(new Date() - startProcessing) / 1000} seconds`); });
+                loops.push(`... MahafuncArray "inline array" ${(new Date() - startProcessing) / 1000} seconds`);
             } else {
                 console.error("BAD MAHAFUNC "+ util.inspect(mahafunc));
             }
         }
         // return $.html();
-        return $;
+        return loops;
     }
 }
 
@@ -236,12 +248,13 @@ exports.processAsync =  async function(text, metadata, mahabhutaFuncs) {
         } else throw new Error(`Bad mahabhutaFuncs object supplied`);
 
         cleanOrDirty = 'clean';
-        await mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; });
+        let results = await mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; });
 
-        // loops.push(`MAHABHUTA processAsync ${metadata.document.path} FINISH ${(new Date() - startProcessing) / 1000} seconds`);
+        results.forEach(result => { loops.push(mhObj.name +'  '+ result); });
+        loops.push(`MAHABHUTA processAsync ${metadata.document.path} FINISH ${(new Date() - startProcessing) / 1000} seconds ${cleanOrDirty}`);
     } while (cleanOrDirty === 'dirty');
 
-    // console.log(util.inspect(loops));
+    loops.forEach(l => { console.log(l); });
 
     return $.html();
 };
