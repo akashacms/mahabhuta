@@ -128,7 +128,7 @@ The file named in `file-name` is the _partial_ which is invoked, and once it's r
 
 **Rendering the Partial** The point of collecting metadata and the `partialBody` is to render the _partial_ using a template engine.  The metadata can be substituted into the _partial_ as dictated by the template.  The example `file-name` above, `partial.html`, would not be processed by a template engine, however, and would simply be what replaces the tag.  There are two methods to render the _partial_ through a template engine, one uses the default built-in renderer, and the other uses an external renderer.
 
-**Default internal Partial renderer** With no further configuration the file named in `file-name` is looked for in the current directory.  Files ending in `.ejs` are rendered using the EJS template engine.  Files ending in `.html` are used intact with no modifications.  In either case the resulting HTML is substituted for the tag.  If the file ends in any other extension, an error is thrown.
+**Default internal Partial renderer** With no further configuration the file named in `file-name` is looked for in the current directory.  Files ending in `.ejs` are rendered using the EJS template engine, and files ending in `.literal` are rendered using the _template-literal_ engine.  Files ending in `.html` are used intact with no modifications.  In either case the resulting HTML is substituted for the tag.  If the file ends in any other extension, an error is thrown.
 
 **Supplying a list of directories to search in** It's possible to set up an array of directories to search for the _partial_ file.  Make `mahaPartial.configuration.partialDirs` an array giving directory names to earch, and the first one found will be used.
 

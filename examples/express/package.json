@@ -9,7 +9,7 @@
     "body-parser": "~1.15.1",
     "cheerio": "^0.22.0",
     "cookie-parser": "~1.4.3",
-    "debug": "~2.2.0",
+    "debug": "~3.1.0",
     "ejs": "^2.4.2",
     "express": "~4.13.4",
     "fs-extra-promise": "^0.4.1",

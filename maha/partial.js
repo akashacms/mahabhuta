@@ -6,6 +6,7 @@ const ejs       = require('ejs');
 const path      = require('path');
 const util      = require('util');
 const fs        = require('fs-extra');
+// const literal   = require('template-literal');
 
 exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta partials built-in", {});
 
@@ -24,7 +25,7 @@ class Partial extends mahabhuta.CustomElement {
 
         // console.log(`mahabhuta Partial partialBody=${d["partialBody"]}`);
 
-        dirty();
+        if ($element.attr("dirty")) dirty();
 
         return module.exports.configuration.renderPartial(fname, d);
     }
@@ -65,7 +66,14 @@ module.exports.configuration = {
             try { return ejs.render(partialText, attrs); } catch (e) {
                 throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
             }
-        } else if (/\.html$/i.test(partialFname)) {
+        } /* else if (/\.literal$/i.test(partialFname)) {
+            try {
+                const t = literal(partialText);
+                return t(attrs);
+            } catch (e) {
+                throw new Error(`Literal rendering of ${fname} failed because of ${e}`);
+            }
+        } */ else if (/\.html$/i.test(partialFname)) {
             // NOTE: The partialBody gets lost in this case
             return partialText;
         } else {
@@ -107,7 +115,14 @@ module.exports.doPartialAsync = async function (fname, attrs) {
         try { return ejs.render(partialText, attrs); } catch (e) {
             throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
         }
-    } else if (/\.html$/i.test(partialFname)) {
+    } /* else if (/\.literal$/i.test(partialFname)) {
+        try {
+            const t = literal.compile(partialText);
+            return t(attrs);
+        } catch (e) {
+            throw new Error(`Literal rendering of ${fname} failed because of ${e}`);
+        }
+    } */ else if (/\.html$/i.test(partialFname)) {
         // NOTE: The partialBody gets lost in this case
         return partialText;
     } else {
@@ -142,7 +157,14 @@ module.exports.doPartialSync = function(fname, attrs) {
         try { return ejs.render(partialText, attrs); } catch (e) {
             throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
         }
-    } else if (/\.html$/i.test(partialFname)) {
+    } /* else if (/\.literal$/i.test(partialFname)) {
+        try {
+            const t = literal.compile(partialText);
+            return t(attrs);
+        } catch (e) {
+            throw new Error(`Literal rendering of ${fname} failed because of ${e}`);
+        }
+    } */ else if (/\.html$/i.test(partialFname)) {
         // NOTE: The partialBody gets lost in this case
         return partialText;
     } else {
