@@ -104,11 +104,16 @@ exports.Munger = class Munger extends exports.Mahafunc {
     }
     async processAll($, metadata, setDirty) {
         var munger = this;
-        var elements = munger.findElements($);
-        if (elements.length <= 0) return Promise.resolve();
-        return Promise.all(elements.map(element => {
-            return munger.process($, $(element), metadata, setDirty);
-        }));
+        try {
+            var elements = munger.findElements($);
+            if (elements.length <= 0) return Promise.resolve();
+            for (let element of elements) {
+                await munger.process($, $(element), metadata, setDirty);
+            }
+        } catch (e) {
+            console.error(`Munger ${munger.selector} Errored with ${util.inspect(e)}`);
+            throw e;
+        }
     }
 }
 
