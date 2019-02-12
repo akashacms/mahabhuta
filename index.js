@@ -171,7 +171,7 @@ exports.MahafuncArray = class MahafuncArray {
                 try {
                     await mahafunc.processAll($, metadata, dirty);
                 } catch (errMunger) {
-                    throw new Error(`Mahabhuta ${mhArray.name} caught error in Munger: ${errMunger.message}`);
+                    throw new Error(`Mahabhuta ${mhArray.name} caught error in Munger(${mahafunc.selector}): ${errMunger.message}`);
                 }
                 if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${mhArray.name} ${mahafunc.selector}`);
                 // loops.push(`... Munger ${mahafunc.selector} ${(new Date() - startProcessing) / 1000} seconds`);
