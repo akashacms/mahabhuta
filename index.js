@@ -163,7 +163,7 @@ exports.MahafuncArray = class MahafuncArray {
                 try {
                     await mahafunc.processAll($, metadata, dirty);
                 } catch (errCustom) {
-                    throw new Error(`Mahabhuta ${mhArray.name} caught error in CustomElement: ${errCustom.message}`);
+                    throw new Error(`Mahabhuta ${mhArray.name} caught error in CustomElement(${mahafunc.elementName}): ${errCustom.message}`);
                 }
                 // loops.push(`... CustomElement ${mahafunc.elementName} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.Munger) {
