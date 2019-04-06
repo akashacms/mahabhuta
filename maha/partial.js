@@ -1,4 +1,3 @@
-'use strict';
 
 const mahabhuta = require('../index');
 const globfs    = require('globfs');
@@ -8,7 +7,9 @@ const util      = require('util');
 const fs        = require('fs-extra');
 // const literal   = require('template-literal');
 
-exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta partials built-in", {});
+const pluginName = "mahabhuta partials built-in";
+
+
 
 class Partial extends mahabhuta.CustomElement {
     get elementName() { return "partial"; }
@@ -27,11 +28,63 @@ class Partial extends mahabhuta.CustomElement {
 
         if ($element.attr("dirty")) dirty();
 
-        return module.exports.configuration.renderPartial(fname, d);
+        let array = this.array;
+        // console.log(`Partial this.array ${util.inspect(array)}`);
+        // console.log(`Partial array.options ${util.inspect(array.options)}`);
+        return array.options.renderPartial
+            ? array.options.renderPartial(fname, d, this.options)
+            : module.exports.renderPartial(fname, d, this.options);
     }
 }
+module.exports.renderPartial = async function (fname, attrs, options) {
+        
+    let partialDirs;
 
-module.exports.mahabhuta.addMahafunc(new Partial());
+    if (typeof options.partialDirs === 'undefined'
+     || !options.partialDirs
+     || options.partialDirs.length <= 0) {
+        partialDirs = [ __dirname ];
+     } else {
+        partialDirs = options.partialDirs;
+     }
+
+    // console.log(`renderPartial looking for ${util.inspect(partialDirs)} ${fname}`);
+    var partialFound = await globfs.findAsync(partialDirs, fname);
+    if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
+    // Pick the first partial found
+    // console.log(`renderPartial found `, partialFound);
+    partialFound = partialFound[0];
+    // console.log(`module.exports.configuration renderPartial ${partialFound}`);
+    if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
+
+    var stats = await fs.stat(partialFound.fullpath);
+    if (!stats.isFile()) {
+        throw new Error(`doPartialAsync non-file found for ${fname} - ${partialFound.fullpath}`);
+    }
+    if (/\.ejs$/i.test(partialFound.fullpath)) {
+        try {
+            let partialText = await fs.readFile(partialFound.fullpath, 'utf8'); 
+            return ejs.render(partialText, attrs); 
+        } catch (e) {
+            throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
+        }
+    } /* else if (/\.literal$/i.test(partialFname)) {
+        try {
+            const t = literal(partialText);
+            return t(attrs);
+        } catch (e) {
+            throw new Error(`Literal rendering of ${fname} failed because of ${e}`);
+        }
+    } */ else if (partialFound.fullpath.toLowerCase().endsWith('.html')
+               || partialFound.fullpath.toLowerCase().endsWith('.xhtml')) {
+        // NOTE: The partialBody gets lost in this case
+        let partialText = await fs.readFile(partialFound.fullpath, 'utf8');
+        // console.log(`renderPartial got text `, partialText);
+        return partialText;
+    } else {
+        throw new Error(`No rendering support for ${fname}`);
+    }
+}
 
 module.exports.configuration = {
     partialDirs: [], 
@@ -86,6 +139,7 @@ module.exports.doPartialAsync = async function (fname, attrs) {
 
     throw new Error("Deprecated");
 
+    /* 
     // find the partial
     // render the partial using the data provided
 
@@ -122,19 +176,19 @@ module.exports.doPartialAsync = async function (fname, attrs) {
         } catch (e) {
             throw new Error(`Literal rendering of ${fname} failed because of ${e}`);
         }
-    } */ else if (/\.html$/i.test(partialFname)) {
+    } * / else if (/\.html$/i.test(partialFname)) {
         // NOTE: The partialBody gets lost in this case
         return partialText;
     } else {
         throw new Error("No rendering support for ${fname}");
-    }
+    } */
 };
 
 
 module.exports.doPartialSync = function(fname, attrs) {
     throw new Error("Deprecated");
 
-    var partialFound = globfs.findSync(module.exports.configuration.partialDirs, fname);
+    /* var partialFound = globfs.findSync(module.exports.configuration.partialDirs, fname);
     if (!partialFound) throw new Error(`No partial directory found for ${fname}`);
     // Pick the first partial found
     partialFound = partialFound[0];
@@ -164,10 +218,24 @@ module.exports.doPartialSync = function(fname, attrs) {
         } catch (e) {
             throw new Error(`Literal rendering of ${fname} failed because of ${e}`);
         }
-    } */ else if (/\.html$/i.test(partialFname)) {
+    } * / else if (/\.html$/i.test(partialFname)) {
         // NOTE: The partialBody gets lost in this case
         return partialText;
     } else {
         throw new Error("No rendering support for ${fname}");
-    }
+    } */
 };
+
+
+module.exports.mahabhutaArray = function(options) {
+    let ret = new mahabhuta.MahafuncArray(pluginName, options);
+    ret.addMahafunc(new Partial());
+    return ret;
+};
+
+
+// Moot?
+exports.mahabhuta = module.exports.mahabhutaArray({});
+
+
+module.exports.mahabhuta.addMahafunc(new Partial());

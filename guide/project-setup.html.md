@@ -37,18 +37,23 @@ $ npm install mahabhuta --save
 
 In an empty directory, create a file named `hello-world.js` containing the following:
 
-```
+```js
 'use strict';
 
 const mahabhuta = require('mahabhuta');
 
-var mahafuncs = new mahabhuta.MahafuncArray("example", {});
+const example_mahafunc_array_options = {
+    // Any options go here
+    from: " -- From configuration"
+};
+
+const mahafuncs = new mahabhuta.MahafuncArray("example", example_mahafunc_array_options);
 
 class HelloWorld extends mahabhuta.CustomElement {
-	get elementName() { return "hello-world"; }
-	process($element, metadata, dirty) {
-		return Promise.resolve("Hello, world!");
-	}
+    get elementName() { return "hello-world"; }
+    async process($element, metadata, dirty) {
+        return "Hello, world!" + this.options.from;
+    }
 }
 mahafuncs.addMahafunc(new HelloWorld());
 
@@ -72,6 +77,8 @@ mahabhuta.process(`
 });
 ```
 
+### Running the example
+
 In that directory run:
 
 ```
@@ -84,22 +91,26 @@ $ node hello-world
 <title>Hi</title>
 </head>
 <body>
-Hello, world!
+Hello, world! -- From configuration
 </body>
 </html>
 ```
 
-Notice that the tag, `<hello-world>`, was replaced by the text: `Hello, world!`
+Notice that the tag, `<hello-world>`, was replaced by the text: `Hello, world! -- From configuration`
 
-This was accomplished by the _HelloWorld_ CustomElement object shown above.
+This was accomplished by the _HelloWorld_ CustomElement object shown above.  The text came from text within the CustomElement implementation, and from the options argument attached to the MahafuncArray.
 
-The _MahafuncArray_ object is used to store an array of what we call, for lack of a better name, Mahafunc's.  A Mahafunc is the unit of processing in Mahabhuta.  There is a base class, Mahafunc, and two subclasses one of which we see here, CustomElement.  
+### Mahabhuta configuration
 
-CustomElement instances match elements named by the `elementName` method.  For each matching element the `process` function is called, and the result of the Promise it returns are inserted into the output.
+The _MahafuncArray_ object is used to store an array of what we call, for lack of a better name, Mahafunc's.  A Mahafunc is the unit of processing in Mahabhuta.  There is a base class, Mahafunc, and several subclasses one of which we see here, CustomElement.
+
+It is assumed each MahafuncArray contains related Mahafunc's.  The configuration object passed to the MahafuncArray constructor is in turn available to Mahafunc's by calling `this.options`.  
+
+CustomElement instances match elements named by the `elementName` method.  For each matching element the `process` function is called, and the result it returns are inserted into the output.
 
 What we've done is define a MahafuncArray containing one Mahafunc.  It's easy to create hundreds of Mahafunc's each serving one DOM-processing purpose.
 
-```
+```js
 mahabhuta.config({
     recognizeSelfClosing: true,
     recognizeCDATA: true
@@ -108,7 +119,9 @@ mahabhuta.config({
 
 This does some necessary configuration of Mahabhuta.  Under the covers Mahabhuta uses Cheerio, and the configuration parameters are actually from Cheerio.
 
-```
+### Invoking a MahafuncArray
+
+```js
 mahabhuta.process(`
     <html>
     <head>

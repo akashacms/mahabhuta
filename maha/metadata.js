@@ -7,7 +7,7 @@ const mahabhuta = require('../index');
 // TODO ograph && twitter cards
 // TODO bootstrap-specific -- responsive embed support
 
-exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta metadata built-in", {});
+const pluginName = "mahabhuta metadata built-in";
 
 class SiteVerification extends mahabhuta.CustomElement {
 	get elementName() { return "site-verification"; }
@@ -21,7 +21,6 @@ class SiteVerification extends mahabhuta.CustomElement {
         return ret;
     }
 }
-exports.mahabhuta.addMahafunc(new SiteVerification());
 
 class DNSPrefetch extends mahabhuta.CustomElement {
 	get elementName() { return "dns-prefetch"; }
@@ -46,7 +45,6 @@ class DNSPrefetch extends mahabhuta.CustomElement {
         return ret;
     }
 }
-exports.mahabhuta.addMahafunc(new DNSPrefetch());
 
 class XMLSitemap extends mahabhuta.CustomElement {
     get elementName() { return "xml-sitemap"; }
@@ -59,7 +57,6 @@ class XMLSitemap extends mahabhuta.CustomElement {
         return `<link rel="sitemap" type="application/xml" title="${title}" href="${href}" />`;
     }
 }
-exports.mahabhuta.addMahafunc(new XMLSitemap());
 
 class ExternalStylesheet extends mahabhuta.CustomElement {
     get elementName() { return "external-stylesheet"; }
@@ -74,12 +71,11 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
         }
     }
 }
-exports.mahabhuta.addMahafunc(new ExternalStylesheet());
 
 class RSSHeaderMeta extends mahabhuta.Munger {
     get selector() { return "rss-header-meta"; }
 
-    async process($, $link, metadata, dirty, done) {
+    async process($, $link, metadata, dirty) {
         if ($('html head').get(0)) {
             var href = $link.attr('href');
             if (!href) {
@@ -90,7 +86,6 @@ class RSSHeaderMeta extends mahabhuta.Munger {
         }
     }
 }
-exports.mahabhuta.addMahafunc(new RSSHeaderMeta());
 
 class BodyAddClass extends mahabhuta.Munger {
     get selector() { return "body-add-class"; }
@@ -107,4 +102,15 @@ class BodyAddClass extends mahabhuta.Munger {
         }
     }
 }
-exports.mahabhuta.addMahafunc(new BodyAddClass());
+
+module.exports.mahabhutaArray = function(options) {
+    let ret = new mahabhuta.MahafuncArray(pluginName, options);
+    ret.addMahafunc(new SiteVerification())
+        .addMahafunc(new DNSPrefetch())
+        .addMahafunc(new XMLSitemap())
+        .addMahafunc(new ExternalStylesheet())
+        .addMahafunc(new RSSHeaderMeta())
+        .addMahafunc(new BodyAddClass());
+    return ret;
+};
+

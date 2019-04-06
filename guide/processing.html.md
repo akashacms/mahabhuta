@@ -14,31 +14,35 @@ To deal with that, Mahabhuta allows a MahafuncArray to contain other MahafuncArr
 
 This means you can create a master MahafuncArray
 
-```
-var mahamaster = new mahabhuta.MahafuncArray("master", {});
+```js
+const mahamaster = new mahabhuta.MahafuncArray("master", {});
 ```
 
-Then you add more MahafuncArray's for each group of Mahafunc's used in your application.
+The _master_ MahafuncArray probably will not need any options, hence the empty options object.
 
-```
-mahamaster.addMahafunc(new mahabhuta.MahafuncArray("plugin-1", {}));
-mahamaster.addMahafunc(new mahabhuta.MahafuncArray("plugin-2", {}));
+Your code then adds more MahafuncArray's for each group of Mahafunc's used in your application.
+
+```js
+mahamaster.addMahafunc(new mahabhuta.MahafuncArray("plugin-1", {
+    // options for plugin-1
+}));
+mahamaster.addMahafunc(new mahabhuta.MahafuncArray("plugin-2", {
+    // options for plugin-2
+}));
 ```
 
 And of course you can call `addMahafunc` on either of those MahafuncArray objects.  
-
-What's that second parameter?  In the API it is marked as `config` but is currently ignored.  It is meant to hold a configuration object for that MahafuncArray.  
 
 ## Adding Mahafunc objects
 
 You of course don't just add MahafuncArray instances.  The whole point to this is to define a list of operations we use to process HTML.  We've already seen this in the previous chapter.  Generally speaking, we do this:
 
-```
+```js
 class OurCustomElement extends mahabhuta.CustomElement {
-	get elementName() { return "our-custom-element"; }
-	process($element, metadata, dirty) {
-		return Promise.resolve("Custom Element Content");
-	}
+    get elementName() { return "our-custom-element"; }
+    async process($element, metadata, dirty) {
+        return "Custom Element Content";
+    }
 }
 mahamaster.addMahafunc(new OurCustomElement());
 ```
@@ -49,18 +53,23 @@ We add an instance of the class rather than the class.  That is, we call `new Ou
 
 The purpose for Mahabhuta is to manipulate HTML:
 
-```
-mahabhuta.process(HTMLINPUT, { }, mahafuncs, (err, HTMLOUTPUT) => {
-    if (err) console.error(err);
-    else ...
-});
+```js
+let result = await mahabhuta.processAsync(HTMLINPUT, {
+    // metadata for the HTMLINPUT
+}, mahafuncs);
 ```
 
-The API follows the old-school callback model for backwards compatibility.
+The _metadata_ object is available for the various Mahafunc's to use and possibly insert into the text result.  
+
+The Mahabhuta library offers two versions of `process`.  The `process` function uses the traditional callback API, while `processAsync` returns a Promise and is therefore useful when called inside an `async/await` function.  
+
+Under the covers in each Mahafunc, the `process` function is an async function and therefore handles asynchronous code exeuction.
 
 ## Order of execution
 
 Each MahafuncArray and each Mahafunc within a MahafuncArray are executed in the order in which they're added.  Later additions go to the end of the list, and are executed later than the earlier additions.
+
+Because every Mahafunc `process` function is an `async` function, asynchronous execution is handled automatically.
 
 ## Overriding a Mahafunc
 
@@ -72,14 +81,14 @@ This is _over-rideability principle_, meaning that every available action or tem
 
 For example, consider a second CustomElement Mahafunc for the `hello-world` tag we looked at earlier.
 
-```
+```js
 var mahafuncs = new mahabhuta.MahafuncArray("example", {});
 
 class HelloWorld extends mahabhuta.CustomElement {
-	get elementName() { return "hello-world"; }
-	process($element, metadata, dirty) {
-		return Promise.resolve("Hello, happy world!");
-	}
+    get elementName() { return "hello-world"; }
+    async process($element, metadata, dirty) {
+        return "Hello, happy world!";
+    }
 }
 mahafuncs.addMahafunc(new HelloWorld());
 ```
@@ -96,7 +105,7 @@ Mahabhuta allows you to trace the processing of MahafuncArray's and Mahafunc's. 
 
 Somewhere in your application call `mahabhuta.setTraceProcessing(true)` as so:
 
-```
+```js
 const mahabhuta = require('mahabhuta');
 mahabhuta.setTraceProcessing(true);
 ```
@@ -133,7 +142,7 @@ Mahabhuta calling CustomElement akashacms-document-viewers docviewer-link
 
 Turning off the tracing is this simple:
 
-```
+```js
 mahabhuta.setTraceProcessing(false);
 ```
 
@@ -149,7 +158,7 @@ We've already looked at this object, without discussing any of the details.  Let
 
 The `elementName` method is a getter, and it defines the name of the element provided by this CustomElement instance.  As we saw in the Hello World example, with a CustomElement defined our HTML can contain a tag, `<our-custom-element>`.  When Mahabhuta executes each CustomElement instance, it scans the DOM as if this were executed:
 
-```
+```js
 var elements = [];
 $('our-custom-element').each(function(i, elem) { ret.push(elem); });
 ```
@@ -158,13 +167,13 @@ For each element pushed to the `elements` array, Mahabhuta calls the `process` f
 
 The `dirty` parameter is a function you are to call if your CustomElement inserts HTML which requires further processing.  You might add HTML that itself is meant to be processed by another Mahafunc.  If that's the case, call `dirty()` in your function.  If this function gets called, Mahabhuta will make sure to run all the Mahafunc's another time.
 
-Your `process` function is to return a Promise that either resolve's or reject's depending on the result.  If the Promise resolve's, it is to contain an HTML string you wish to replace the element.  In Mahabhuta this is of course done as so:
+Your `process` function should be declared `async`.  Under the covers it returns a Promise that either resolve's or reject's depending on the result.  Mahabhuta will capture both errors and good results and act appropriately.
 
-```
+The action taken with the result depends on the Mahafunc subclass used.  For CustomElement, the action taken is:
+
+```js
 $(element).replaceWith(html);
 ```
-
-Because the `process` function returns a Promise, you can make whatever asynchronous calls you like.
 
 Bottom line:  CustomElement objects are meant to implement, as the name implies, a custom HTML element which is completely replaced by other HTML code.
 
@@ -182,22 +191,22 @@ Since there's an exception to every rule, the Mahabhuta built-in Mahafunc's does
 
 Being an HTML element, the HTML matching your CustomElement can of course have attributes.
 
-```
+```html
 <our-custom-element href="http://akashacms.com"></our-custom-element>
 ```
 
 Which you can retrieve as so:
 
-```
-process($element, metadata, dirty) {
-    var href = $element.attr('href');
+```js
+async process($element, metadata, dirty) {
+    const href = $element.attr('href');
     ...
 }
 ```
 
 You can also retrieve metadata values:
 
-```
+```js
 mahabhuta.process(htmlSource, {
     href: "http://akashacms.com",
     title: "AkashaCMS"
@@ -209,11 +218,11 @@ mahabhuta.process(htmlSource, {
 
 Then access the values as so
 
-```
-process($element, metadata, dirty) {
+```js
+async process($element, metadata, dirty) {
     ...
-    var href = metadata.href;
-    var title = metadata.title;
+    const href = metadata.href;
+    const title = metadata.title;
     ...
 }
 ```
@@ -222,11 +231,11 @@ process($element, metadata, dirty) {
 
 Munger objects are meant to implement broader changes to the HTML.  For example you might want to "clean up" certain HTML code, or wrap certain code with some other HTML, or to insert some HTML elsewhere, or to move HTML from one place to another, and so forth.  The jQuery API is powerful, and we want you to use all of it in processing HTML.
 
-```
+```js
 class OurMungerClass extends mahabhuta.Munger {
 	get selector() { return "jQuery Selector"; }
 
-	process($, $match, metadata, dirty) {
+	async process($, $match, metadata, dirty) {
     }
 }
 ```
@@ -247,13 +256,13 @@ What you do within the `process` method is up to you.  Have fun.
 
 It's quite possible to lead Mahabhuta into an infinite loop:
 
-```
+```js
 class InfiniteLoop extends mahabhuta.Munger {
 	get selector() { return "body"; }
 
-	process($, $match, metadata, dirty) {
+	async process($, $match, metadata, dirty) {
         dirty();
-        return Promise.resolve("infinite loop");
+        return "infinite loop";
     }
 }
 ```
@@ -268,7 +277,7 @@ For backwards compatibility with existing AkashaCMS code, Mahabhuta also support
 
 The function signature is as so:
 
-```
+```js
 mahafunc($, metadata, dirty, next);
 ```
 
