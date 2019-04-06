@@ -236,7 +236,7 @@ exports.MahafuncArray = class MahafuncArray {
                 // results.forEach(result => { loops.push(`    ... "inline result" ${result} ${(new Date() - startProcessing) / 1000} seconds`); });
                 // loops.push(`... MahafuncArray "inline array" ${(new Date() - startProcessing) / 1000} seconds`);
             } else {
-                console.error("BAD MAHAFUNC "+ util.inspect(mahafunc));
+                console.error(`BAD MAHAFUNC in array ${this.name} - ${util.inspect(mahafunc)}`);
             }
         }
         // return $.html();
