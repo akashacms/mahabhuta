@@ -31,3 +31,10 @@ guide/bower_components
 guide/out
 out
 
+node_modules
+package-lock.json
+examples/express/node_modules
+examples/express/package-lock.json
+examples/processor/node_modules
+examples/processor/package-lock.json
+npm-debug.log
