@@ -8,23 +8,47 @@ Included with Mahabhuta is a small collection of useful Mahafunc's.  They serve 
 
 The MahafuncArray for these built-in Mahafuncs is available as:
 
-```
+```js
 const mahaMetadata = require('mahabhuta/maha/metadata');
 const mahaPartial = require('mahabhuta/maha/partial');
 ```
 
 Typically you'll have a master MahafuncArray containing other MahafuncArray instances for each group of Mahafunc's.  The Mahabhuta built-in MahafuncArray should be the last in the master list.
 
-```
+```js
 var mahamaster = new mahabhuta.MahafuncArray("master", {});
 mahamaster.addMahafunc(group1.mahabhuta);
 mahamaster.addMahafunc(group2.mahabhuta);
 mahamaster.addMahafunc(group3.mahabhuta);
-mahamaster.addMahafunc(mahaMetadata.mahabhuta);
-mahamaster.addMahafunc(mahaPartial.mahabhuta);
+mahamaster.addMahafunc(mahaMetadata.mahabhutaArray({
+    // options
+}));
+mahamaster.addMahafunc(mahaPartial.mahabhutaArray({
+    // options
+}));
 ```
 
 This is to ensure we take advantage of the over-rideability principle.
+
+## Options for `maha/metadata`
+
+The options object lets us pass in a root URL.  If the generated code is for a subdirectory, then the URL for certain things need to reflect the subdirectory.  What this means is if the canonical URL is `http://example.com/path/to/docroot/` then the URL's for certain things must start with `/path/to/docroot/`.
+
+```js
+mahamaster.addMahafunc(mahaMetadata.mahabhutaArray({
+    root_url: config.root_url
+});
+```
+
+## Options for `maha/partial`
+
+Some systems have a function for processing `<partial>` tags.  In such a case
+
+```js
+mahamaster.addMahafunc(mahaPartial.mahabhutaArray({
+    renderPartial: thePartialFunction
+}));
+```
 
 # SiteVerification -- site-verification
 
@@ -32,7 +56,7 @@ Various services want you to validate ownership of a website or domain by puttin
 
 USAGE:
 
-```
+```html
 <site-verification google="code from Google"/>
 ```
 
@@ -44,19 +68,19 @@ In other words, this can speed up the user experience by instructing the web bro
 
 USAGE:
 
-```
+```html
 <dns-prefetch control="on|off" dnslist="url1, url2, url3"/>
 ```
 
 The first parameter controls whether dns-prefetch is used, by generating this tag:
 
-```
+```html
 <meta http-equiv="x-dns-prefetch-control" content="on|off">
 ```
 
 The second parameter is a comma-separated list of URL's which end up generating a corresponding list of these tags:
 
-```
+```html
 <link rel="dns-prefetch" href="http://www.spreadfirefox.com/">
 ```
 
@@ -66,7 +90,7 @@ Several years ago the search engines cooperated on developing an XML based sitem
 
 USAGE:
 
-```
+```html
 <xml-sitemap title="Title Text" href="/path/to/sitemap.xml"/>
 ```
 
@@ -76,7 +100,7 @@ This assists with referencing CSS stylesheets outside the page, that must be loa
 
 USAGE:
 
-```
+```html
 <external-stylesheet href="url" media="optional media type"/>
 ```
 
@@ -86,7 +110,7 @@ When publishing an RSS feed there are two things to get correct on the page.  On
 
 The `<rss-header-meta>` tag adds the correct tag into the header, if/when the header exists.  It rummages around in the DOM to find the `<head>` section, inserting there this tag:
 
-```
+```html
 <link rel="alternate" type="application/rss+xml" href="${href}"/>
 ```
 
@@ -94,7 +118,7 @@ If it finds the `<head>` tag, it inserts the `<link>` tag, and then deletes itse
 
 USAGE:
 
-```
+```html
 <rss-header-meta href="url"/>
 ```
 
@@ -102,7 +126,7 @@ USAGE:
 
 Instantiate it with:
 
-```
+```js
 const mahaPartial = require('mahabhuta/maha/partial');
 ...
 mahamaster.addMahafunc(mahaPartial.mahabhuta);
@@ -114,7 +138,7 @@ Implementation is a little more complex than for the other tags, as it will requ
 
 USAGE:
 
-```
+```html
 <partial data-param1="value1" data-param2="value2" file-name="partial.html">
 body content of the partial
 </partial>

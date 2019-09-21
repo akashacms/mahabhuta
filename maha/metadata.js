@@ -1,5 +1,7 @@
 'use strict';
 
+const url = require('url');
+const path = require('path');
 const mahabhuta = require('../index');
 
 // TODO JavaScript script tags
@@ -52,8 +54,22 @@ class XMLSitemap extends mahabhuta.CustomElement {
         // http://microformats.org/wiki/rel-sitemap
         var href = $element.attr("href");
         if (!href) href = "/sitemap.xml";
+
+        // If a root_url is set we need to override the sitemap href
+        if (this.array.options.root_url) {
+            let pRootUrl = url.parse(this.array.options.root_url);
+            href = path.normalize(
+                    path.join(pRootUrl.pathname, href)
+            );
+        }
         var title = $element.attr("title");
-        if (!title) title = "Sitemap";
+        if (!title) {
+            if (this.array.options.sitemap_title) {
+                title = this.array.options.sitemap_title;
+            } else {
+                title = "Sitemap";
+            }
+        }
         return `<link rel="sitemap" type="application/xml" title="${title}" href="${href}" />`;
     }
 }
@@ -80,6 +96,12 @@ class RSSHeaderMeta extends mahabhuta.Munger {
             var href = $link.attr('href');
             if (!href) {
                 throw new Error("No href in rss-header-meta tag");
+            }
+            if (this.array.options.root_url) {
+                let pRootUrl = url.parse(this.array.options.root_url);
+                href = path.normalize(
+                        path.join(pRootUrl.pathname, href)
+                );
             }
             $('head').append(`<link rel="alternate" type="application/rss+xml" href="${href}"/>`);
             $link.remove();
