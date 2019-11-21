@@ -5,7 +5,6 @@ const ejs       = require('ejs');
 const path      = require('path');
 const util      = require('util');
 const fs        = require('fs-extra');
-// const literal   = require('template-literal');
 
 const pluginName = "mahabhuta partials built-in";
 

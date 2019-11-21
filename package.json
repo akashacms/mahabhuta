@@ -21,7 +21,7 @@
     "type": "git",
     "url": "https://github.com/akashacms/mahabhuta.git"
   },
-  "version": "0.7.2",
+  "version": "0.7.3",
   "engines": {
     "node": ">=12.4"
   },
@@ -29,7 +29,6 @@
     "cheerio": ">=0.22.x",
     "globfs": ">=0.3",
     "ejs": "*",
-    "fs-extra": ">=4.0.1",
-    "template-literal": ">=1.x"
+    "fs-extra": ">=4.0.1"
   }
 }

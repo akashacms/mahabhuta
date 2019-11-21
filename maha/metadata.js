@@ -17,7 +17,9 @@ class SiteVerification extends mahabhuta.CustomElement {
         var ret = '';
         var google = $element.attr('google');
         if (google) {
-            ret += `<meta name="google-site-verification" content="${google}"/>`;
+            let $ = mahabhuta.parse('<meta name="google-site-verification" content=""/>');
+            $('meta').attr('content', google);
+            ret += $.html();
         }
         // TBD site verification for other services
         return ret;
@@ -40,9 +42,15 @@ class DNSPrefetch extends mahabhuta.CustomElement {
         var ret = '';
 
         if (control) {
-            ret += `<meta http-equiv="x-dns-prefetch-control" content="${control}"/>`;
+            let $ = mahabhuta.parse('<meta name="x-dns-prefetch-control" content=""/>');
+            $('meta').attr('content', control);
+            ret += $.html();
         }
-        dns.forEach(item => { ret += `<link rel="dns-prefetch" href="${item}"/>`; });
+        dns.forEach(item => { 
+            let $ = mahabhuta.parse('<link rel="dns-prefetch" href=""/>');
+            $('link').attr('href', item);
+            ret += $.html();
+        });
 
         return ret;
     }
@@ -70,7 +78,10 @@ class XMLSitemap extends mahabhuta.CustomElement {
                 title = "Sitemap";
             }
         }
-        return `<link rel="sitemap" type="application/xml" title="${title}" href="${href}" />`;
+        let $ = mahabhuta.parse('<link rel="sitemap" type="application/xml" href=""/>');
+        $('link').attr('href', href);
+        $('link').attr('title', title);
+        return $.html();
     }
 }
 
@@ -80,11 +91,12 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
         var href = $element.attr('href');
         if (!href) throw new Error("No href supplied");
         var media = $element.attr('media');
+        let $ = mahabhuta.parse('<link rel="stylesheet" type="text/css" href=""/>');
+        $('link').attr('href', href);
         if (media) {
-            return `<link rel="stylesheet" type="text/css" href="${href}" media="${media}"/>`;
-        } else {
-            return `<link rel="stylesheet" type="text/css" href="${href}"/>`;
+            $('link').attr('media', media);
         }
+        return $.html();
     }
 }
 
@@ -103,7 +115,9 @@ class RSSHeaderMeta extends mahabhuta.Munger {
                         path.join(pRootUrl.pathname, href)
                 );
             }
-            $('head').append(`<link rel="alternate" type="application/rss+xml" href="${href}"/>`);
+            let $link = mahabhuta.parse('<link rel="alternate" type="application/rss+xml" href=""/>');
+            $link('link').attr('href', href);
+            $('head').append($link.html());
             $link.remove();
         }
     }
