@@ -27,8 +27,10 @@
   },
   "dependencies": {
     "cheerio": ">=0.22.x",
-    "globfs": ">=0.3",
     "ejs": "*",
-    "fs-extra": ">=4.0.1"
+    "fs-extra": ">=4.0.1",
+    "globfs": ">=0.3",
+    "liquid": "^4.1.0",
+    "nunjucks": "^3.2.2"
   }
 }
