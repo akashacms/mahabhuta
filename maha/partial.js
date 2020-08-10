@@ -5,6 +5,7 @@ const ejs       = require('ejs');
 const nunjucks  = require('nunjucks');
 const Liquid    = require('liquid');
 const engine    = new Liquid.Engine();
+const Handlebars = require("handlebars");
 const path      = require('path');
 const util      = require('util');
 const fs        = require('fs-extra');
@@ -79,13 +80,21 @@ module.exports.renderPartial = async function (fname, attrs, options) {
         } catch (e) {
             throw new Error(`Liquid rendering of ${fname} failed because of ${e}`);
         }
-    } else if (/\.nunjucks$/i.test(partialFound.fullpath)) {
+    } else if (/\.njk$/i.test(partialFound.fullpath)) {
         try {
             let partialText = await fs.readFile(partialFound.fullpath, 'utf8'); 
             nunjucks.configure({ autoescape: false });
             return nunjucks.renderString(partialText, attrs);
         } catch (e) {
             throw new Error(`Nunjucks rendering of ${fname} failed because of ${e}`);
+        }
+    } else if (/\.handlebars$/i.test(partialFound.fullpath)) {
+        try {
+            let partialText = await fs.readFile(partialFound.fullpath, 'utf8'); 
+            const template = Handlebars.compile(partialText);
+            return template(attrs);
+        } catch (e) {
+            throw new Error(`Handlebars rendering of ${fname} failed because of ${e}`);
         }
     } /* else if (/\.literal$/i.test(partialFname)) {
         try {
