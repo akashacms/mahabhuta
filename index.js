@@ -31,6 +31,7 @@ const fs      = require('fs-extra');
 
 var configCheerio;
 var traceFlag = false;
+var tracePerf = true;
 
 exports.config = function(_configCheerio) {
     configCheerio = _configCheerio;
@@ -182,41 +183,64 @@ exports.MahafuncArray = class MahafuncArray {
         // const startProcessing = new Date();
         for (var mahafunc of this.functions) {
             if (mahafunc instanceof exports.CustomElement) {
+                // Performance testing
+                let _start;
+                if (tracePerf) _start = new Date();
                 if (traceFlag) console.log(`Mahabhuta calling CustomElement ${this.name} ${mahafunc.elementName}`);
                 try {
                     await mahafunc.processAll($, metadata, dirty);
                 } catch (errCustom) {
                     throw new Error(`Mahabhuta ${this.name} caught error in CustomElement(${mahafunc.elementName}): ${errCustom.message}`);
                 }
+                // Performance testing
+                if (tracePerf) console.log(`CustomElement ${this.name} ${mahafunc.elementName} ${(new Date() - _start) / 1000} seconds`)
                 // loops.push(`... CustomElement ${mahafunc.elementName} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.Munger) {
+                // Performance testing
+                let _start;
+                if (tracePerf) _start = new Date();
                 if (traceFlag)  console.log(`Mahabhuta calling Munger ${this.name} ${mahafunc.selector}`);
                 try {
                     await mahafunc.processAll($, metadata, dirty);
                 } catch (errMunger) {
                     throw new Error(`Mahabhuta ${this.name} caught error in Munger(${mahafunc.selector}): ${errMunger.message}`);
                 }
+                // Performance testing
+                if (tracePerf) console.log(`Munger ${this.name} ${mahafunc.selector} ${(new Date() - _start) / 1000} seconds`)
                 if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${this.name} ${mahafunc.selector}`);
                 // loops.push(`... Munger ${mahafunc.selector} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.PageProcessor) {
+                // Performance testing
+                let _start;
+                if (tracePerf) _start = new Date();
                 if (traceFlag)  console.log(`Mahabhuta calling ${this.name} PageProcessor `);
                 try {
                     await mahafunc.process($, metadata, dirty);
                 } catch (errPageProcessor) {
                     throw new Error(`Mahabhuta ${this.name} caught error in PageProcessor: ${errPageProcessor.message}`);
                 }
+                // Performance testing
+                if (tracePerf) console.log(`PageProcessor ${this.name} ${(new Date() - _start) / 1000} seconds`)
                 // loops.push(`... PageProcessor ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.MahafuncArray) {
+                // Performance testing
+                let _start;
+                if (tracePerf) _start = new Date();
                 let results = [];
                 try {
                     results = await mahafunc.process($, metadata, dirty);
                 } catch (errMahafuncArray) {
                     throw new Error(`Mahabhuta ${this.name} caught error in MahafuncArray: ${errMahafuncArray.message}`);
                 }
+                // Performance testing
+                if (tracePerf) console.log(`MahafuncArray ${this.name} ${mahafunc.name} ${(new Date() - _start) / 1000} seconds`)
 
                 // results.forEach(result => { loops.push(`    ... "${mahafunc.name} result" ${result} ${(new Date() - startProcessing) / 1000} seconds`); });
                 // loops.push(`... MahafuncArray ${mahafunc.name} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (typeof mahafunc === 'function') {
+                // Performance testing
+                let _start;
+                if (tracePerf) _start = new Date();
                 if (traceFlag)  console.log(`Mahabhuta calling an ${this.name} "function" `);
                 try {
                     await new Promise((resolve, reject) => {
@@ -228,11 +252,18 @@ exports.MahafuncArray = class MahafuncArray {
                 } catch (errFunction) {
                     throw new Error(`Mahabhuta ${this.name} caught error in function: ${errFunction.message}`);
                 }
+                // Performance testing
+                if (tracePerf) console.log(`function ${this.name} ${(new Date() - _start) / 1000} seconds`)
                 // loops.push(`... MahafuncArray "function" ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (Array.isArray(mahafunc)) {
+                // Performance testing
+                let _start;
+                if (tracePerf) _start = new Date();
                 let mhObj = new exports.MahafuncArray("inline", this._config);
                 mhObj.setMahafuncArray(mahafunc);
                 let results = await mhObj.process($, metadata, dirty);
+                // Performance testing
+                if (tracePerf) console.log(`Array ${this.name} inline ${(new Date() - _start) / 1000} seconds`)
                 // results.forEach(result => { loops.push(`    ... "inline result" ${result} ${(new Date() - startProcessing) / 1000} seconds`); });
                 // loops.push(`... MahafuncArray "inline array" ${(new Date() - startProcessing) / 1000} seconds`);
             } else {
