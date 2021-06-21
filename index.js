@@ -86,11 +86,16 @@ exports.CustomElement = class CustomElement extends exports.Mahafunc {
         try {
             var elements = custom.findElements($);
             if (elements.length <= 0) return;
+            // Performance testing
+            let _start;
+            if (tracePerf) _start = new Date();
             for (var element of elements) {
                 let replaceWith = await custom.process($(element), metadata, setDirty);
                 // console.log(`CustomElement ${this.elementName} process returned ${replaceWith}`);
                 $(element).replaceWith(replaceWith);
             }
+            // Performance testing
+            if (tracePerf) console.log(`CustomElement ${this.array.name} ${this.elementName} ${(new Date() - _start) / 1000} seconds`);
         } catch (e) {
             console.error(`CustomElement ${custom.elementName} Errored with ${util.inspect(e)}`);
             throw e;
@@ -113,9 +118,14 @@ exports.Munger = class Munger extends exports.Mahafunc {
         try {
             var elements = munger.findElements($);
             if (elements.length <= 0) return;
+            // Performance testing
+            let _start;
+            if (tracePerf) _start = new Date();
             for (let element of elements) {
                 await munger.process($, $(element), metadata, setDirty);
             }
+            // Performance testing
+            if (tracePerf) console.log(`Munger ${this.array.name} ${this.elementName} ${(new Date() - _start) / 1000} seconds`);
         } catch (e) {
             console.error(`Munger ${munger.selector} Errored with ${util.inspect(e)}`);
             throw e;
@@ -183,30 +193,20 @@ exports.MahafuncArray = class MahafuncArray {
         // const startProcessing = new Date();
         for (var mahafunc of this.functions) {
             if (mahafunc instanceof exports.CustomElement) {
-                // Performance testing
-                let _start;
-                if (tracePerf) _start = new Date();
                 if (traceFlag) console.log(`Mahabhuta calling CustomElement ${this.name} ${mahafunc.elementName}`);
                 try {
                     await mahafunc.processAll($, metadata, dirty);
                 } catch (errCustom) {
                     throw new Error(`Mahabhuta ${this.name} caught error in CustomElement(${mahafunc.elementName}): ${errCustom.message}`);
                 }
-                // Performance testing
-                if (tracePerf) console.log(`CustomElement ${this.name} ${mahafunc.elementName} ${(new Date() - _start) / 1000} seconds`)
                 // loops.push(`... CustomElement ${mahafunc.elementName} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.Munger) {
-                // Performance testing
-                let _start;
-                if (tracePerf) _start = new Date();
                 if (traceFlag)  console.log(`Mahabhuta calling Munger ${this.name} ${mahafunc.selector}`);
                 try {
                     await mahafunc.processAll($, metadata, dirty);
                 } catch (errMunger) {
                     throw new Error(`Mahabhuta ${this.name} caught error in Munger(${mahafunc.selector}): ${errMunger.message}`);
                 }
-                // Performance testing
-                if (tracePerf) console.log(`Munger ${this.name} ${mahafunc.selector} ${(new Date() - _start) / 1000} seconds`)
                 if (traceFlag)  console.log(`Mahabhuta FINISHED Munger ${this.name} ${mahafunc.selector}`);
                 // loops.push(`... Munger ${mahafunc.selector} ${(new Date() - startProcessing) / 1000} seconds`);
             } else if (mahafunc instanceof exports.PageProcessor) {
