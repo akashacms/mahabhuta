@@ -1,8 +1,6 @@
 'use strict';
 
 const mahabhuta = require('./index');
-const globfs    = require('globfs');
-
 exports.mahabhuta = new mahabhuta.MahafuncArray("mahabhuta built-in", {});
 
 class SiteVerification extends mahabhuta.CustomElement {

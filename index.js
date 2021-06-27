@@ -27,11 +27,10 @@
 
 const cheerio = require('cheerio');
 const util    = require('util');
-const fs      = require('fs-extra');
 
 var configCheerio;
 var traceFlag = false;
-var tracePerf = false;
+var tracePerf = true;
 
 exports.config = function(_configCheerio) {
     configCheerio = _configCheerio;
@@ -121,6 +120,7 @@ exports.Munger = class Munger extends exports.Mahafunc {
             // Performance testing
             let _start;
             if (tracePerf) _start = new Date();
+            // console.log(`Munger ${this.array.name} ${this.elementName} found ${elements.length} elements`);
             for (let element of elements) {
                 await munger.process($, $(element), metadata, setDirty);
             }

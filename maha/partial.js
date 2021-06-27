@@ -1,6 +1,5 @@
 
 const mahabhuta = require('../index');
-const globfs    = require('globfs');
 const ejs       = require('ejs');
 const nunjucks  = require('nunjucks');
 const Liquid    = require('liquid');
@@ -8,7 +7,7 @@ const engine    = new Liquid.Engine();
 const Handlebars = require("handlebars");
 const path      = require('path');
 const util      = require('util');
-const fs        = require('fs-extra');
+const fs        = require('fs/promises');
 
 const pluginName = "mahabhuta partials built-in";
 
@@ -39,6 +38,25 @@ class Partial extends mahabhuta.CustomElement {
             : module.exports.renderPartial(fname, d, this.options);
     }
 }
+
+async function lookForPartial(partialDirs, partialfn) {
+    for (let dir of partialDirs) {
+        let fn2check = path.join(dir, partialfn);
+        let stats;
+        try {
+            stats = await fs.stat(fn2check);
+        } catch (err) { stats = undefined; }
+        if (stats.isFile()) {
+            return {
+                basedir: dir,
+                path: partialfn,
+                fullpath: fn2check
+            };
+        }
+    }
+    return undefined;
+}
+
 module.exports.renderPartial = async function (fname, attrs, options) {
         
     let partialDirs;
@@ -52,11 +70,8 @@ module.exports.renderPartial = async function (fname, attrs, options) {
      }
 
     // console.log(`renderPartial looking for ${util.inspect(partialDirs)} ${fname}`);
-    var partialFound = await globfs.findAsync(partialDirs, fname);
+    const partialFound = await lookForPartial(partialDirs, fname);
     if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
-    // Pick the first partial found
-    // console.log(`renderPartial found `, partialFound);
-    partialFound = partialFound[0];
     // console.log(`module.exports.configuration renderPartial ${partialFound}`);
     if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
 
@@ -130,10 +145,8 @@ module.exports.configuration = {
             partialDirs = module.exports.configuration.partialDirs;
          }
 
-        var partialFound = await globfs.findAsync(partialDirs, fname);
+        const partialFound = await lookForPartial(partialDirs, fname);
         if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
-        // Pick the first partial found
-        partialFound = partialFound[0];
         // console.log(`module.exports.configuration renderPartial ${partialFound}`);
         if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
     
@@ -173,7 +186,7 @@ module.exports.doPartialAsync = async function (fname, attrs) {
 
     // TBD configuration for partialDirs
     // console.log(`doPartialAsync ${util.inspect(fname)} ${util.inspect(module.exports.configuration.partialDirs)}`);
-    var partialFound = await globfs.findAsync(module.exports.configuration.partialDirs, fname);
+    // var partialFound = await globfs.findAsync(module.exports.configuration.partialDirs, fname);
     // console.log(`doPartialAsync ${partialFound}`);
     if (!partialFound) throw new Error(`No partial directory found for ${fname}`);
     // Pick the first partial found

@@ -2,6 +2,7 @@
 
 const url = require('url');
 const path = require('path');
+// const util = require('util');
 const mahabhuta = require('../index');
 
 // TODO JavaScript script tags
@@ -102,10 +103,11 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
 
 class RSSHeaderMeta extends mahabhuta.Munger {
     get selector() { return "rss-header-meta"; }
+    get elementName() { return "rss-header-meta"; }
 
-    async process($, $link, metadata, dirty) {
+    async process($, $element, metadata, dirty) {
         if ($('html head').get(0)) {
-            var href = $link.attr('href');
+            var href = $element.attr('href');
             if (!href) {
                 throw new Error("No href in rss-header-meta tag");
             }
@@ -118,7 +120,7 @@ class RSSHeaderMeta extends mahabhuta.Munger {
             let $link = mahabhuta.parse('<link rel="alternate" type="application/rss+xml" href=""/>');
             $link('link').attr('href', href);
             $('head').append($link.html());
-            $link.remove();
+            $element.remove();
         }
     }
 }
