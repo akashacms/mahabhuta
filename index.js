@@ -30,7 +30,7 @@ const util    = require('util');
 
 var configCheerio;
 var traceFlag = false;
-var tracePerf = true;
+var tracePerf = false;
 
 exports.config = function(_configCheerio) {
     configCheerio = _configCheerio;
