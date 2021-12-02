@@ -88,11 +88,19 @@ exports.CustomElement = class CustomElement extends exports.Mahafunc {
             // Performance testing
             let _start;
             if (tracePerf) _start = new Date();
+
+            /* if (this.elementName === "site-verification") {
+                console.log(`CustomElement ${this.elementName} `, $.html());
+            } */
+
             for (var element of elements) {
                 let replaceWith = await custom.process($(element), metadata, setDirty);
                 // console.log(`CustomElement ${this.elementName} process returned ${replaceWith}`);
                 $(element).replaceWith(replaceWith);
             }
+            /* if (this.elementName === "site-verification") {
+                console.log(`CustomElement ${this.elementName} `, $.html());
+            } */
             // Performance testing
             if (tracePerf) console.log(`CustomElement ${this.array.name} ${this.elementName} ${(new Date() - _start) / 1000} seconds`);
         } catch (e) {
@@ -288,15 +296,19 @@ exports.processAsync =  async function(text, metadata, mahabhutaFuncs) {
 
     if (!mahabhutaFuncs || mahabhutaFuncs.length < 0) mahabhutaFuncs = [];
 
-    var cleanOrDirty = 'first-time';
+    let cleanOrDirty = 'first-time';
+
+    // console.log(`processAsync text at start ${text}`);
 
     // Allow a pre-parsed context to be passed in
-    var $ = typeof text === 'function' ? text : exports.parse(text);
+    const $ = typeof text === 'function' ? text : exports.parse(text);
+
+    // console.log(`processAsync $ at start `, $.html());
 
     const loops = [];
     do {
         let startProcessing = new Date();
-        var mhObj;
+        let mhObj;
         if (Array.isArray(mahabhutaFuncs)) {
             // console.log(`ARRAY substitution`);
             mhObj = new exports.MahafuncArray("master", {});

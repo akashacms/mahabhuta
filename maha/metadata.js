@@ -4,6 +4,7 @@ const url = require('url');
 const path = require('path');
 // const util = require('util');
 const mahabhuta = require('../index');
+const cheerio = require('cheerio');
 
 // TODO JavaScript script tags
 // TODO some metadata like rel=canonical
@@ -18,7 +19,7 @@ class SiteVerification extends mahabhuta.CustomElement {
         var ret = '';
         var google = $element.attr('google');
         if (google) {
-            let $ = mahabhuta.parse('<meta name="google-site-verification" content=""/>');
+            let $ = /* mahabhuta.parse */ cheerio.load('<meta name="google-site-verification" content=""/>', null, false);
             $('meta').attr('content', google);
             ret += $.html();
         }
@@ -43,12 +44,12 @@ class DNSPrefetch extends mahabhuta.CustomElement {
         var ret = '';
 
         if (control) {
-            let $ = mahabhuta.parse('<meta name="x-dns-prefetch-control" content=""/>');
+            let $ = /* mahabhuta.parse */ cheerio.load('<meta name="x-dns-prefetch-control" content=""/>', null, false);
             $('meta').attr('content', control);
             ret += $.html();
         }
         dns.forEach(item => { 
-            let $ = mahabhuta.parse('<link rel="dns-prefetch" href=""/>');
+            let $ = /* mahabhuta.parse */ cheerio.load('<link rel="dns-prefetch" href=""/>', null, false);
             $('link').attr('href', item);
             ret += $.html();
         });
@@ -79,7 +80,7 @@ class XMLSitemap extends mahabhuta.CustomElement {
                 title = "Sitemap";
             }
         }
-        let $ = mahabhuta.parse('<link rel="sitemap" type="application/xml" href=""/>');
+        let $ = /* mahabhuta.parse */ cheerio.load('<link rel="sitemap" type="application/xml" href=""/>', null, false);
         $('link').attr('href', href);
         $('link').attr('title', title);
         return $.html();
@@ -92,7 +93,7 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
         var href = $element.attr('href');
         if (!href) throw new Error("No href supplied");
         var media = $element.attr('media');
-        let $ = mahabhuta.parse('<link rel="stylesheet" type="text/css" href=""/>');
+        let $ = /* mahabhuta.parse */ cheerio.load('<link rel="stylesheet" type="text/css" href=""/>', null, false);
         $('link').attr('href', href);
         if (media) {
             $('link').attr('media', media);
@@ -101,27 +102,24 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
     }
 }
 
-class RSSHeaderMeta extends mahabhuta.Munger {
+class RSSHeaderMeta extends mahabhuta.CustomElement {
     get selector() { return "rss-header-meta"; }
     get elementName() { return "rss-header-meta"; }
 
-    async process($, $element, metadata, dirty) {
-        if ($('html head').get(0)) {
-            var href = $element.attr('href');
-            if (!href) {
-                throw new Error("No href in rss-header-meta tag");
-            }
-            if (this.array.options.root_url) {
-                let pRootUrl = url.parse(this.array.options.root_url);
-                href = path.normalize(
-                        path.join(pRootUrl.pathname, href)
-                );
-            }
-            let $link = mahabhuta.parse('<link rel="alternate" type="application/rss+xml" href=""/>');
-            $link('link').attr('href', href);
-            $('head').append($link.html());
-            $element.remove();
+    process($element, metadata, dirty) {
+        var href = $element.attr('href');
+        if (!href) {
+            throw new Error("No href in rss-header-meta tag");
         }
+        if (this.array.options.root_url) {
+            let pRootUrl = url.parse(this.array.options.root_url);
+            href = path.normalize(
+                    path.join(pRootUrl.pathname, href)
+            );
+        }
+        let $link = /* mahabhuta.parse */ cheerio.load('<link rel="alternate" type="application/rss+xml" href=""/>', null, false);
+        $link('link').attr('href', href);
+        return $link.html();
     }
 }
 
