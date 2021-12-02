@@ -19,7 +19,7 @@ class SiteVerification extends mahabhuta.CustomElement {
         var ret = '';
         var google = $element.attr('google');
         if (google) {
-            let $ = /* mahabhuta.parse */ cheerio.load('<meta name="google-site-verification" content=""/>', null, false);
+            let $ = cheerio.load('<meta name="google-site-verification" content=""/>', null, false);
             $('meta').attr('content', google);
             ret += $.html();
         }
@@ -44,12 +44,12 @@ class DNSPrefetch extends mahabhuta.CustomElement {
         var ret = '';
 
         if (control) {
-            let $ = /* mahabhuta.parse */ cheerio.load('<meta name="x-dns-prefetch-control" content=""/>', null, false);
+            let $ = cheerio.load('<meta http-equiv="x-dns-prefetch-control" content=""/>', null, false);
             $('meta').attr('content', control);
             ret += $.html();
         }
         dns.forEach(item => { 
-            let $ = /* mahabhuta.parse */ cheerio.load('<link rel="dns-prefetch" href=""/>', null, false);
+            let $ = cheerio.load('<link rel="dns-prefetch" href=""/>', null, false);
             $('link').attr('href', item);
             ret += $.html();
         });
@@ -80,7 +80,7 @@ class XMLSitemap extends mahabhuta.CustomElement {
                 title = "Sitemap";
             }
         }
-        let $ = /* mahabhuta.parse */ cheerio.load('<link rel="sitemap" type="application/xml" href=""/>', null, false);
+        let $ = cheerio.load('<link rel="sitemap" type="application/xml" href=""/>', null, false);
         $('link').attr('href', href);
         $('link').attr('title', title);
         return $.html();
@@ -93,7 +93,7 @@ class ExternalStylesheet extends mahabhuta.CustomElement {
         var href = $element.attr('href');
         if (!href) throw new Error("No href supplied");
         var media = $element.attr('media');
-        let $ = /* mahabhuta.parse */ cheerio.load('<link rel="stylesheet" type="text/css" href=""/>', null, false);
+        let $ = cheerio.load('<link rel="stylesheet" type="text/css" href=""/>', null, false);
         $('link').attr('href', href);
         if (media) {
             $('link').attr('media', media);
@@ -117,7 +117,7 @@ class RSSHeaderMeta extends mahabhuta.CustomElement {
                     path.join(pRootUrl.pathname, href)
             );
         }
-        let $link = /* mahabhuta.parse */ cheerio.load('<link rel="alternate" type="application/rss+xml" href=""/>', null, false);
+        let $link = cheerio.load('<link rel="alternate" type="application/rss+xml" href=""/>', null, false);
         $link('link').attr('href', href);
         return $link.html();
     }
