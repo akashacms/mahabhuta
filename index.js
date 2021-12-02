@@ -294,8 +294,8 @@ exports.processAsync =  async function(text, metadata, mahabhutaFuncs) {
     var $ = typeof text === 'function' ? text : exports.parse(text);
 
     const loops = [];
-    const startProcessing = new Date();
     do {
+        let startProcessing = new Date();
         var mhObj;
         if (Array.isArray(mahabhutaFuncs)) {
             // console.log(`ARRAY substitution`);
@@ -310,7 +310,7 @@ exports.processAsync =  async function(text, metadata, mahabhutaFuncs) {
         let results = await mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; });
 
         // results.forEach(result => { loops.push(mhObj.name +'  '+ result); });
-        // loops.push(`MAHABHUTA processAsync ${metadata.document.path} FINISH ${(new Date() - startProcessing) / 1000} seconds ${cleanOrDirty}`);
+        // console.log(`MAHABHUTA processAsync ${metadata.document.path} FINISH ${(new Date() - startProcessing) / 1000} seconds ${cleanOrDirty}`);
     } while (cleanOrDirty === 'dirty');
 
     // loops.forEach(l => { console.log(l); });

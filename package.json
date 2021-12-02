@@ -28,7 +28,6 @@
   "dependencies": {
     "cheerio": ">=1.0.0-rc.10",
     "ejs": "*",
-    "globfs": ">=0.3",
     "handlebars": "^4.7.6",
     "liquid": "^4.1.0",
     "nunjucks": "^3.2.2"
