@@ -1,8 +1,12 @@
 node_modules
 package-lock.json
+examples
 examples/express/node_modules
 examples/express/package-lock.json
 examples/processor/node_modules
 examples/processor/package-lock.json
+guide
+maha/base.js
+maha/microformats.js
 npm-debug.log
 test
