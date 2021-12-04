@@ -49,6 +49,40 @@ mahamaster.addMahafunc(new OurCustomElement());
 
 We add an instance of the class rather than the class.  That is, we call `new OurClassName()` rather than just passing in `OurClassName`.
 
+## Two passes - 'Final' Mahafuncs
+
+Mahabhuta executes two two sets of Mahafuncs.  The first set is meant to be the normal processing for your application, and you should strive to use the first pass.  Mahafuncs are added to the first pass using `addMahafunc` as shown above.
+
+The second pass is meant for cleanup of any unwanted tags or attributes left behind by the first pass.  It should be reserved for cleanup processing.  Mahafuncs are added to the second pass using `addFinalMahafunc`.
+
+For example - In AkashaCMS, in the `built-in` plugin, there is a Mahafunc, `AnchorCleanup`, which cleans up `<a>` tags.  It leaves an attribute, `munged=yes`, to indicate that it has touched an `<a>` tag so it doesn't touch it more than once.
+
+That attribute shouldn't appear in a production website, but is benign when displayed in a web browser.  But, when constructing an EPUB, the standards for the HTML used in EPUB's is much more strict, and the `epubcheck` program complains about the incorrect attribute, `munged=yes`.  The Mahafunc named `MungedAttrRemover` is added to the final pass, and removes that attribute.
+
+```js
+class MungedAttrRemover extends mahabhuta.Munger {
+    get selector() { return 'html body a[munged]'; }
+    async process($, $element, metadata, dirty, done) {
+        $element.removeAttr('munged');
+    }
+}
+```
+
+This is a simple Mahafunc, targeting `<a munged="yes">` tags, and removing the `munged` attribute.
+
+```js
+
+module.exports.mahabhutaArray = function(options) {
+    let ret = new mahabhuta.MahafuncArray(pluginName, options);
+    ...
+
+    ret.addFinalMahafunc(new MungedAttrRemover());
+    return ret;
+};
+```
+
+And this is how the function is added to the `MahafuncArray`.
+
 ## The result: HTML in, changed HTML out
 
 The purpose for Mahabhuta is to manipulate HTML:
