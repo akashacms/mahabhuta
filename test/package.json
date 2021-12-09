@@ -4,7 +4,8 @@
   "description": "",
   "main": "test-literal.js",
   "scripts": {
-    "test": "mocha ./test-ejs.js"
+    "test": "mocha ./test-partials.js ./test-parse.js",
+    "test:parse": "mocha ./test-parse.js"
   },
   "keywords": [],
   "author": "David Herron <david@davidherron.com>",

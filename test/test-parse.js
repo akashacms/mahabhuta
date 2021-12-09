@@ -1,0 +1,93 @@
+
+const { assert } = require('chai');
+
+const mahabhuta = require('../index');
+
+describe('properly handle custom tags', function() {
+
+    const sample = `
+<!doctype html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!-- Consider adding a manifest.appcache: h5bp.com/d/Offline -->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+<meta charset="utf-8" />
+<!-- Use the .htaccess and remove these lines to avoid edge case issues. More info: h5bp.com/i/378 -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Show Content</title>
+<meta name="foo" content="bar"/>
+<funky-bump></funky-bump>
+<ak-stylesheets></ak-stylesheets>
+<ak-headerJavaScript></ak-headerJavaScript>
+<rss-header-meta href="/rss-for-header.xml"></rss-header-meta>
+<external-stylesheet href="http://external.site/foo.css"></external-stylesheet>
+<dns-prefetch
+control="we must have control"
+dnslist="foo1.com,foo2.com,foo3.com"></dns-prefetch>
+<site-verification google="We are good"></site-verification>
+<xml-sitemap></xml-sitemap>
+<xml-sitemap href="/foo-bar-sitemap.xml" title="Foo Bar Sitemap"></xml-sitemap>
+</head>
+<body>
+<h1>Show Content</h1>
+<section id="teaser"><ak-teaser></ak-teaser></section>
+<article id="original">
+    <div class="article-head"><h2>Article title</h2></div>
+    <p><show-content id="simple" href="/shown-content.html"></show-content></p>
+    <p><show-content id="dest" dest="http://dest.url" href="/shown-content.html"></show-content></p>
+    <p><show-content id="template" 
+            template="ak_show-content-card.html.ejs" 
+            href="/shown-content.html"
+            content-image="/imgz/shown-content-image.jpg"
+            >
+    Caption text
+    </show-content></p>
+    <p><show-content id="template2" 
+            template="ak_show-content-card.html.ejs" 
+            href="/shown-content.html"
+            dest="http://dest.url"
+            content-image="/imgz/shown-content-image.jpg">
+    Caption text
+    </show-content></p>
+
+</article>
+<article id="duplicate">
+    <ak-insert-body-content></ak-insert-body-content>
+</article>
+<ak-footerJavaScript></ak-footerJavaScript>
+</body>
+</html>`;
+
+    let $;
+    it('should parse sample text', function() {
+        mahabhuta.config({
+            // For cheerio rc.10 this undocumented flag is
+            // required to handle the custom tags in
+            // the sample HTML
+            _useHtmlParser2: true
+        });
+        $ = mahabhuta.parse(sample);
+    });
+
+    it('should find custom tags', function() {
+        assert.equal($('head funky-bump').length, 1);
+        assert.equal($('head ak-stylesheets').length, 1);
+        assert.equal($('head xml-sitemap').length, 2);
+        assert.equal($('head show-content').length, 0);
+        assert.equal($('body show-content').length, 4);
+    });
+
+    it('should be okay after serialization', function() {
+        const txt = $.html();
+        let $$ = mahabhuta.parse(txt);
+        assert.equal($$('head funky-bump').length, 1);
+        assert.equal($$('head ak-stylesheets').length, 1);
+        assert.equal($$('head xml-sitemap').length, 2);
+        assert.equal($$('head show-content').length, 0);
+        assert.equal($$('body show-content').length, 4);
+    });
+});
