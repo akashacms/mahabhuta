@@ -1,66 +1,15 @@
 
+const fsp = require('fs').promises;
 const { assert } = require('chai');
 
 const mahabhuta = require('../index');
 
 describe('properly handle custom tags', function() {
 
-    const sample = `
-<!doctype html>
-<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
-<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
-<!-- Consider adding a manifest.appcache: h5bp.com/d/Offline -->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
-<head>
-<meta charset="utf-8" />
-<!-- Use the .htaccess and remove these lines to avoid edge case issues. More info: h5bp.com/i/378 -->
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Show Content</title>
-<meta name="foo" content="bar"/>
-<funky-bump></funky-bump>
-<ak-stylesheets></ak-stylesheets>
-<ak-headerJavaScript></ak-headerJavaScript>
-<rss-header-meta href="/rss-for-header.xml"></rss-header-meta>
-<external-stylesheet href="http://external.site/foo.css"></external-stylesheet>
-<dns-prefetch
-control="we must have control"
-dnslist="foo1.com,foo2.com,foo3.com"></dns-prefetch>
-<site-verification google="We are good"></site-verification>
-<xml-sitemap></xml-sitemap>
-<xml-sitemap href="/foo-bar-sitemap.xml" title="Foo Bar Sitemap"></xml-sitemap>
-</head>
-<body>
-<h1>Show Content</h1>
-<section id="teaser"><ak-teaser></ak-teaser></section>
-<article id="original">
-    <div class="article-head"><h2>Article title</h2></div>
-    <p><show-content id="simple" href="/shown-content.html"></show-content></p>
-    <p><show-content id="dest" dest="http://dest.url" href="/shown-content.html"></show-content></p>
-    <p><show-content id="template" 
-            template="ak_show-content-card.html.ejs" 
-            href="/shown-content.html"
-            content-image="/imgz/shown-content-image.jpg"
-            >
-    Caption text
-    </show-content></p>
-    <p><show-content id="template2" 
-            template="ak_show-content-card.html.ejs" 
-            href="/shown-content.html"
-            dest="http://dest.url"
-            content-image="/imgz/shown-content-image.jpg">
-    Caption text
-    </show-content></p>
-
-</article>
-<article id="duplicate">
-    <ak-insert-body-content></ak-insert-body-content>
-</article>
-<ak-footerJavaScript></ak-footerJavaScript>
-</body>
-</html>`;
+    let sample;
+    it('should read sample1.html', async function() {
+        sample =  await fsp.readFile('./docs/sample1.html', 'utf8');
+    });
 
     let $;
     it('should parse sample text', function() {

@@ -4,7 +4,7 @@
   "description": "",
   "main": "test-literal.js",
   "scripts": {
-    "test": "mocha ./test-partials.js ./test-parse.js",
+    "test": "mocha ./test-partials.js ./test-parse.js ./test-process.js",
     "test:parse": "mocha ./test-parse.js"
   },
   "keywords": [],
