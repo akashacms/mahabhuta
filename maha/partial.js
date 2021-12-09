@@ -2,8 +2,7 @@
 const mahabhuta = require('../index');
 const ejs       = require('ejs');
 const nunjucks  = require('nunjucks');
-const Liquid    = require('liquid');
-const engine    = new Liquid.Engine();
+const { Liquid } = require('liquidjs');
 const Handlebars = require("handlebars");
 const path      = require('path');
 const util      = require('util');
@@ -11,19 +10,17 @@ const fs        = require('fs/promises');
 
 const pluginName = "mahabhuta partials built-in";
 
-
-
 class Partial extends mahabhuta.CustomElement {
     get elementName() { return "partial"; }
     async process($element, metadata, dirty) {
-        var data  = $element.data();
-        var fname = $element.attr("file-name");
-        var body  = $element.html();
+        const data  = $element.data();
+        const fname = $element.attr("file-name");
+        const body  = $element.html();
 
-        var d = {};
-        for (var mprop in metadata) { d[mprop] = metadata[mprop]; }
-        var data = $element.data();
-        for (var dprop in data) { d[dprop] = data[dprop]; }
+        const d = {};
+        for (let mprop in metadata) { d[mprop] = metadata[mprop]; }
+        // const data = $element.data();
+        for (let dprop in data) { d[dprop] = data[dprop]; }
         d["partialBody"] = body;
 
         // console.log(`mahabhuta Partial partialBody=${d["partialBody"]}`);
@@ -31,22 +28,23 @@ class Partial extends mahabhuta.CustomElement {
         if ($element.attr("dirty")) dirty();
 
         let array = this.array;
-        // console.log(`Partial this.array ${util.inspect(array)}`);
         // console.log(`Partial array.options ${util.inspect(array.options)}`);
         return array.options.renderPartial
-            ? array.options.renderPartial(fname, d, this.options)
-            : module.exports.renderPartial(fname, d, this.options);
+            ? array.options.renderPartial(fname, d, array.options)
+            : module.exports.renderPartial(fname, d, array.options);
     }
 }
 
 async function lookForPartial(partialDirs, partialfn) {
+    // console.log(`lookForPartial checking in ${partialDirs} for ${partialfn}`);
     for (let dir of partialDirs) {
+        // console.log(`lookForPartial check ${dir} ${partialfn}`);
         let fn2check = path.join(dir, partialfn);
         let stats;
         try {
             stats = await fs.stat(fn2check);
-        } catch (err) { stats = undefined; }
-        if (stats.isFile()) {
+        } catch (err) { console.error(err); stats = undefined; }
+        if (stats && stats.isFile()) {
             return {
                 basedir: dir,
                 path: partialfn,
@@ -64,7 +62,14 @@ module.exports.renderPartial = async function (fname, attrs, options) {
     if (typeof options.partialDirs === 'undefined'
      || !options.partialDirs
      || options.partialDirs.length <= 0) {
-        partialDirs = [ __dirname ];
+        if (typeof exports.configuration.partialDirs !== 'undefined'
+         && exports.configuration.partialDirs
+         && Array.isArray(exports.configuration.partialDirs)
+         && exports.configuration.partialDirs.length > 0) {
+            partialDirs = exports.configuration.partialDirs;
+        } else {
+            partialDirs = [ __dirname ];
+        }
      } else {
         partialDirs = options.partialDirs;
      }
@@ -88,10 +93,12 @@ module.exports.renderPartial = async function (fname, attrs, options) {
         }
     } else if (/\.liquid$/i.test(partialFound.fullpath)) {
         try {
-            let partialText = await fs.readFile(partialFound.fullpath, 'utf8'); 
-            let template = await engine.parse(partialText);
-            let result = await template.render(attrs);
-            return result;
+            let partialText = await fs.readFile(partialFound.fullpath, 'utf8');
+            const engine    = new Liquid({
+                partials: partialDirs,
+                extname: '.liquid'
+            });
+            return await engine.parseAndRender(partialText, attrs);
         } catch (e) {
             throw new Error(`Liquid rendering of ${fname} failed because of ${e}`);
         }
@@ -111,14 +118,7 @@ module.exports.renderPartial = async function (fname, attrs, options) {
         } catch (e) {
             throw new Error(`Handlebars rendering of ${fname} failed because of ${e}`);
         }
-    } /* else if (/\.literal$/i.test(partialFname)) {
-        try {
-            const t = literal(partialText);
-            return t(attrs);
-        } catch (e) {
-            throw new Error(`Literal rendering of ${fname} failed because of ${e}`);
-        }
-    } */ else if (partialFound.fullpath.toLowerCase().endsWith('.html')
+    } else if (partialFound.fullpath.toLowerCase().endsWith('.html')
                || partialFound.fullpath.toLowerCase().endsWith('.xhtml')) {
         // NOTE: The partialBody gets lost in this case
         let partialText = await fs.readFile(partialFound.fullpath, 'utf8');
@@ -160,14 +160,7 @@ module.exports.configuration = {
             try { return ejs.render(partialText, attrs); } catch (e) {
                 throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
             }
-        } /* else if (/\.literal$/i.test(partialFname)) {
-            try {
-                const t = literal(partialText);
-                return t(attrs);
-            } catch (e) {
-                throw new Error(`Literal rendering of ${fname} failed because of ${e}`);
-            }
-        } */ else if (/\.html$/i.test(partialFname)) {
+        } else if (/\.html$/i.test(partialFname)) {
             // NOTE: The partialBody gets lost in this case
             return partialText;
         } else {
@@ -183,8 +176,5 @@ module.exports.mahabhutaArray = function(options) {
 };
 
 
-// Moot?
 exports.mahabhuta = module.exports.mahabhutaArray({});
 
-
-module.exports.mahabhuta.addMahafunc(new Partial());

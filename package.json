@@ -29,7 +29,7 @@
     "cheerio": "0.22.x",
     "ejs": "^3.1.x",
     "handlebars": "^4.7.x",
-    "liquid": "^5.1.x",
+    "liquidjs": "^9.28.x",
     "nunjucks": "^3.2.x"
   }
 }
