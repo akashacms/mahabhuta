@@ -27,9 +27,9 @@
   },
   "dependencies": {
     "cheerio": "0.22.x",
-    "ejs": "*",
-    "handlebars": "^4.7.6",
-    "liquid": "^4.1.0",
-    "nunjucks": "^3.2.2"
+    "ejs": "^3.1.x",
+    "handlebars": "^4.7.x",
+    "liquid": "^5.1.x",
+    "nunjucks": "^3.2.x"
   }
 }
