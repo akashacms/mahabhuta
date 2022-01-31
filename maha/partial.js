@@ -1,5 +1,5 @@
 
-const mahabhuta = require('../index');
+const mahabhuta = require('../dist/index');
 const ejs       = require('ejs');
 const nunjucks  = require('nunjucks');
 const { Liquid } = require('liquidjs');

@@ -1,7 +1,7 @@
 
 const { assert } = require('chai');
 
-const mahabhuta = require('../index');
+const mahabhuta = require('../dist/index');
 const mahaPartial = require('../maha/partial');
 
 describe('render using templates', function() {

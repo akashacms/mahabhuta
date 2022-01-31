@@ -2,7 +2,7 @@
 const fsp = require('fs').promises;
 const { assert } = require('chai');
 
-const mahabhuta = require('../index');
+const mahabhuta = require('../dist/index');
 const mahaPartial = require('../maha/partial');
 const mahaMeta = require('../maha/metadata');
 
