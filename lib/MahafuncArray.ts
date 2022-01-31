@@ -1,6 +1,9 @@
 
 import { logProcessing, logPerformance } from './index';
 import { Mahafunc } from './Mahafunc';
+import { PageProcessor } from './PageProcessor';
+import { CustomElement } from './CustomElement';
+import { Munger } from './Munger';
 import * as util from 'util';
 
 export type MahafuncType = Mahafunc | MahafuncArray | Function | [];
@@ -97,7 +100,7 @@ export class MahafuncArray {
         // Run the functions, then run the final_functions
         for (let funclist of [ this.functions, this.final_functions]) {
             for (let mahafunc of funclist) {
-                if (mahafunc instanceof exports.CustomElement) {
+                if (mahafunc instanceof CustomElement) {
                     logProcessing(`Mahabhuta calling CustomElement ${this.name} ${mahafunc.elementName}`);
                     try {
                         await mahafunc.processAll($, metadata, dirty);
@@ -105,7 +108,7 @@ export class MahafuncArray {
                         throw new Error(`Mahabhuta ${this.name} caught error in CustomElement(${mahafunc.elementName}): ${errCustom.message}`);
                     }
                     // loops.push(`... CustomElement ${mahafunc.elementName} ${(new Date() - startProcessing) / 1000} seconds`);
-                } else if (mahafunc instanceof exports.Munger) {
+                } else if (mahafunc instanceof Munger) {
                     logProcessing(`Mahabhuta calling Munger ${this.name} ${mahafunc.selector}`);
                     try {
                         await mahafunc.processAll($, metadata, dirty);
@@ -114,7 +117,7 @@ export class MahafuncArray {
                     }
                     logProcessing(`Mahabhuta FINISHED Munger ${this.name} ${mahafunc.selector}`);
                     // loops.push(`... Munger ${mahafunc.selector} ${(new Date() - startProcessing) / 1000} seconds`);
-                } else if (mahafunc instanceof exports.PageProcessor) {
+                } else if (mahafunc instanceof PageProcessor) {
                     // Performance testing
                     const _start = new Date();
                     logProcessing(`Mahabhuta calling ${this.name} PageProcessor `);
@@ -126,7 +129,7 @@ export class MahafuncArray {
                     // Performance testing
                     logPerformance(_start, `PageProcessor ${this.name}`);
                     // loops.push(`... PageProcessor ${(new Date() - startProcessing) / 1000} seconds`);
-                } else if (mahafunc instanceof exports.MahafuncArray) {
+                } else if (mahafunc instanceof MahafuncArray) {
                     // Performance testing
                     const _start = new Date();
                     let results = [];
