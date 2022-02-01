@@ -21,15 +21,26 @@
     "type": "git",
     "url": "https://github.com/akashacms/mahabhuta.git"
   },
-  "version": "0.7.9",
+  "scripts": {
+    "build:lib": "npx tsc",
+    "dopublish": "npm publish --access public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "version": "0.8.0",
   "engines": {
     "node": ">=12.4"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.10",
-    "ejs": "^3.1.x",
-    "handlebars": "^4.7.x",
-    "liquidjs": "^9.28.x",
-    "nunjucks": "^3.2.x"
+    "cheerio": "1.0.0-rc.10",
+    "ejs": "3.1.6",
+    "handlebars": "4.7.7",
+    "liquidjs": "9.34.0",
+    "nunjucks": "3.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "17.0.13",
+    "ts-node": "10.4.0",
+    "typescript": "4.5.5"
   }
 }

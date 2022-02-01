@@ -2,7 +2,7 @@
 const fsp = require('fs').promises;
 const { assert } = require('chai');
 
-const mahabhuta = require('../index');
+const mahabhuta = require('../dist/index');
 const mahaPartial = require('../maha/partial');
 const mahaMeta = require('../maha/metadata');
 
@@ -16,13 +16,17 @@ describe('process custom tags', function() {
     let result;
     it('should process sample text', async function() {
 
+        // Note that mahaMeta includes Mahafuncs subclassing
+        // both CustomElement and Munger.  Further,
+        // sample1.html includes tags that will trigger
+        // both types of Mahafuncs.
+
         result = await mahabhuta.processAsync(sample, {
             // Metadata
         }, [
             mahaPartial.mahabhutaArray({ }),
             mahaMeta.mahabhutaArray({ })
         ]);
-
 
     });
 
@@ -41,7 +45,7 @@ describe('process custom tags', function() {
             _useHtmlParser2: true
         });
         $ = mahabhuta.parse(result);
-    
+
         assert.equal($('head meta[name=foo]').length, 1);
         assert.equal($('head meta[name=foo]').attr('content'), 'bar');
 
@@ -92,10 +96,13 @@ describe('process custom tags', function() {
             assert.equal($(sm).attr('type'), 'application/xml');
             assert.isOk(isGoodSitemapURL($(sm).attr('href')));
         }
-        
+
         assert.equal($('head show-content').length, 0);
         assert.equal($('body show-content').length, 4);
         assert.equal($('body section ak-teaser').length, 1);
         assert.equal($('body #duplicate ak-insert-body-content').length, 1);
+
+        assert.equal($('body-add-class').length, 0);
+        assert.isOk($('body').hasClass('saw-body-add-class'));
     });
 });

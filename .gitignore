@@ -38,3 +38,4 @@ examples/express/package-lock.json
 examples/processor/node_modules
 examples/processor/package-lock.json
 npm-debug.log
+dist

@@ -3,7 +3,7 @@
 const url = require('url');
 const path = require('path');
 // const util = require('util');
-const mahabhuta = require('../index');
+const mahabhuta = require('../dist/index');
 const cheerio = require('cheerio');
 
 // TODO JavaScript script tags
