@@ -22,7 +22,8 @@
     "url": "https://github.com/akashacms/mahabhuta.git"
   },
   "scripts": {
-    "build:lib": "npx tsc"
+    "build:lib": "npx tsc",
+    "dopublish": "npm publish --access public"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

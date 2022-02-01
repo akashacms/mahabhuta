@@ -12,9 +12,18 @@ import { logProcessing, logPerformance } from './index';
  */
  export class CustomElement extends Mahafunc {
 
+    /**
+     * The name of the element that is implemented by
+     * this function.
+     */
     get elementName(): string {
         throw new Error("The 'elementName' getter must be overridden");
     }
+
+    /**
+     * The selector for a _CustomElement_ implementation
+     * is simply the name of the element.
+     */
     get selector(): string { return this.elementName; }
 
     async process($element, metadata, setDirty: Function, done?: Function) {
@@ -23,16 +32,12 @@ import { logProcessing, logPerformance } from './index';
 
     async processAll($, metadata, setDirty: Function) {
         try {
-            var elements = this.findElements($);
+            let elements = this.findElements($);
             if (elements.length <= 0) return;
             // Performance testing
             const _start = new Date();
 
-            /* if (this.elementName === "site-verification") {
-                console.log(`CustomElement ${this.elementName} `, $.html());
-            } */
-
-            for (var element of elements) {
+            for (let element of elements) {
                 let replaceWith = await this.process($(element), metadata, setDirty);
                 // console.log(`CustomElement ${this.elementName} process returned ${replaceWith}`);
                 $(element).replaceWith(replaceWith);

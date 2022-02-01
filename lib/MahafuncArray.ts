@@ -13,6 +13,10 @@ const _mahaarray_options = Symbol('options');
 const _mahaarray_functions = Symbol('functions');
 const _mahaarray_final_functions = Symbol('final_functions');
 
+/**
+ * Holds a series of functions ({@link Mahafunc}) that 
+ * will execute in the order they were added.
+ */
 export class MahafuncArray {
 
     constructor(name: string, config: Object) {
@@ -23,17 +27,51 @@ export class MahafuncArray {
         // console.log(`new MahafuncArray ${this[_mahaarray_name]} ${util.inspect(this[_mahaarray_options])}`);
     }
 
+    /**
+     * Retrieve the configuration object supplied
+     * to the array.
+     */
     get options() { return this[_mahaarray_options]; }
 
+    /**
+     * Retrieve the name for the array.  This name is
+     * purely for informational purposes.
+     */
     get name() { return this[_mahaarray_name]; }
 
+    /**
+     * Retrieve the array of functions.
+     */
     get functions() { return this[_mahaarray_functions]; }
 
+    /**
+     * Retrieve the array of _final_ functions.  These are
+     * executed after the main array is fully finished.
+     */
     get final_functions() { return this[_mahaarray_final_functions]; }
 
+    /**
+     * Return the number of elements in the function array.
+     */
     get length(): number { return this[_mahaarray_functions].length; }
+
+    /**
+     * Return the number of elements in 
+     * the final function array.
+     */
     get length_final(): number { return this[_mahaarray_final_functions].length; }
 
+    /**
+     * Add a function to the array.
+     * 
+     * For historical purposes we support several types
+     * of function.  It's preferable to use {@link Mahafunc}
+     * objects, or other {@link MahafuncArray}'s.  But we
+     * also allow bare functions.
+     * 
+     * @param func A single item of type {@link MahafuncType}
+     * @returns To support chaining, the array is returned
+     */
     addMahafunc(func: MahafuncType): MahafuncArray {
         if (!(func instanceof Mahafunc
            || func instanceof MahafuncArray
@@ -49,7 +87,15 @@ export class MahafuncArray {
         return this; // support chaining
     }
 
-    setMahafuncArray(functions: Array<Mahafunc>): MahafuncArray {
+    /**
+     * Replace any existing function array with a
+     * new array of either {@link Mahafunc} or 
+     * {@link MahafuncArray} objects
+     * 
+     * @param functions 
+     * @returns To support chaining, the array is returned
+     */
+    setMahafuncArray(functions: Array<Mahafunc | MahafuncArray>): MahafuncArray {
         if (!(Array.isArray(functions))) {
             throw new Error("Improper mahafunction array "+ util.inspect(functions));
         } else {
@@ -63,6 +109,14 @@ export class MahafuncArray {
         return this; // support chaining
     }
 
+    /**
+     * Replace any existing final function array with a
+     * new array of either {@link Mahafunc} or 
+     * {@link MahafuncArray} objects
+     * 
+     * @param functions 
+     * @returns To support chaining, the array is returned
+     */
     setFinalMahafuncArray(final_functions: Array<Mahafunc>): MahafuncArray {
         if (!(Array.isArray(final_functions))) {
             throw new Error("Improper mahafunction array "+ util.inspect(final_functions));
@@ -77,6 +131,17 @@ export class MahafuncArray {
         return this; // support chaining
     }
 
+    /**
+     * Add a function to the array.
+     * 
+     * For historical purposes we support several types
+     * of function.  It's preferable to use {@link Mahafunc}
+     * objects, or other {@link MahafuncArray}'s.  But we
+     * also allow bare functions.
+     * 
+     * @param func A single item of type {@link MahafuncType}
+     * @returns To support chaining, the array is returned
+     */
     addFinalMahafunc(func: MahafuncType): MahafuncArray {
         if (!(func instanceof Mahafunc
            || func instanceof MahafuncArray
@@ -92,6 +157,14 @@ export class MahafuncArray {
         return this; // support chaining
     }
 
+    /**
+     * Execute the functions in the array.
+     * 
+     * @param $ The parsed form of the HTML ready to use with Cheerio functions
+     * @param metadata A metadata object supplied by the application, and passed through to functions.
+     * @param dirty A function provided by {@link processAsync} that notifies whether a function has inserted something in the HTML which requires further processing.
+     * @returns 
+     */
     async process($, metadata, dirty: Function) {
         logProcessing(`Mahabhuta starting array ${this.name}`);
         const loops = [];
