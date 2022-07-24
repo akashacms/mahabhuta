@@ -70,15 +70,14 @@ module.exports.renderPartial = async function (fname, attrs, options) {
         } else {
             partialDirs = [ __dirname ];
         }
-     } else {
+    } else {
         partialDirs = options.partialDirs;
-     }
+    }
 
     // console.log(`renderPartial looking for ${util.inspect(partialDirs)} ${fname}`);
     const partialFound = await lookForPartial(partialDirs, fname);
     if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
-    // console.log(`module.exports.configuration renderPartial ${partialFound}`);
-    if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
+    // console.log(`module.exports.configuration renderPartial ${util.inspect(partialFound)}`);
 
     var stats = await fs.stat(partialFound.fullpath);
     if (!stats.isFile()) {
@@ -86,8 +85,11 @@ module.exports.renderPartial = async function (fname, attrs, options) {
     }
     if (/\.ejs$/i.test(partialFound.fullpath)) {
         try {
-            let partialText = await fs.readFile(partialFound.fullpath, 'utf8'); 
-            return ejs.render(partialText, attrs); 
+            let partialText = await fs.readFile(partialFound.fullpath, 'utf8');
+            // console.log(`EJS loaded partial ${fname} => ${partialText}`);
+            let rendered = ejs.render(partialText, attrs); 
+            // console.log(`EJS rendered ${fname} ==> ${rendered}`);
+            return rendered;
         } catch (e) {
             throw new Error(`EJS rendering of ${fname} failed because of ${e}`);
         }
@@ -148,7 +150,6 @@ module.exports.configuration = {
         const partialFound = await lookForPartial(partialDirs, fname);
         if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
         // console.log(`module.exports.configuration renderPartial ${partialFound}`);
-        if (!partialFound) throw new Error(`No partial found for ${fname} in ${util.inspect(partialDirs)}`);
     
         var partialFname = path.join(partialFound.basedir, partialFound.path);
         var stats = await fs.stat(partialFname);

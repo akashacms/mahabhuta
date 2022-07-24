@@ -1,0 +1,3 @@
+_useHtmlParser2: true
+recognizeSelfClosing: true
+recognizeCDATA: true

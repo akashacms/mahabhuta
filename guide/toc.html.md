@@ -46,6 +46,7 @@ Express or other app frameworks -- Use ExpressJS as an example of integrating
     <li><a href="project-setup.html" id="project-setup">Project Setup</a></li>
     <li><a href="processing.html" id="processing">Processing HTML DOM with Mahabhuta's Mahafuncs</a></li>
     <li><a href="built-in.html" id="built-in">Using the built-in Mahafuncs</a></li>
+    <li><a href="cli.html" id="cli">Using the Mahabhuta CLI tool</a></li>
     <li><a href="express.html" id="built-in">Using Mahabhuta in an Express application</a></li>
     <li><a href="api.html" id="api">The Mahabhuta API</a></li>
 </ol>
