@@ -1,7 +1,7 @@
 {
     "include": [ "lib/**/*.ts", "lib/**/*.js", "lib/**/*.mjs" ],
     "compilerOptions": {
-        "lib": [ "es6", "es2021", "esnext" ],
+        "lib": [ "es6", "es2021", "esnext", "DOM" ],
         "target": "es2021",
         "module": "commonjs",
         "moduleResolution": "Node",
