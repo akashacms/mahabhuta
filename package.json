@@ -36,13 +36,14 @@
     "node": ">=12.4"
   },
   "dependencies": {
+    "@types/js-yaml": "^4.0.9",
     "cheerio": "1.0.0-rc.12",
-    "commander": "^9.4.0",
+    "commander": "^12.0.x",
     "ejs": "^3.1.x",
-    "handlebars": "4.7.7",
-    "liquidjs": "9.34.0",
-    "nunjucks": "3.2.3",
-    "yaml": "^2.1.1"
+    "handlebars": "^4.7.x",
+    "js-yaml": "^4.1.x",
+    "liquidjs": "^10.10.x",
+    "nunjucks": "3.2.x"
   },
   "devDependencies": {
     "@types/node": "17.0.13",
