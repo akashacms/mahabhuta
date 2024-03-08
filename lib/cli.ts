@@ -2,7 +2,7 @@
 import { program } from 'commander';
 import * as mahabhuta from './index.js';
 import { promises as fsp } from 'fs';
-import YAML from 'yaml';
+import YAML from 'js-yaml';
 
 // mahabhuta process file.html -o file2.html -m mahafuncs.js -m mahafuncs2.js -m mahafuncs3.js --options options.yaml --metadata metadata.yaml
 
@@ -41,7 +41,7 @@ program
 
                 const txt = await fsp.readFile(cmdObj.config, 'utf8');
                 // console.log(`Read config ${cmdObj.config}`, txt);
-                const cheerioConfig = YAML.parse(txt);
+                const cheerioConfig: any = YAML.load(txt);
 
                 // For cheerio 1.0.0-rc.10 we need to use this setting.
                 // If the configuration has set this, we must not
@@ -63,7 +63,7 @@ program
             if (cmdObj.metadata) {
                 const txt = await fsp.readFile(cmdObj.metadata, 'utf8');
                 // console.log(`Read metadata ${cmdObj.metadata}`, txt);
-                metadata = YAML.parse(txt);
+                metadata = YAML.load(txt);
             }
             // console.log('After metadata');
 
@@ -71,7 +71,7 @@ program
             if (cmdObj.options) {
                 const txt = await fsp.readFile(cmdObj.options, 'utf8');
                 // console.log(`Read options ${cmdObj.options}`, txt);
-                mhOptions = YAML.parse(txt);
+                mhOptions = YAML.load(txt);
             }
             // console.log('After options');
 
