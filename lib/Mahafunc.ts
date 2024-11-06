@@ -62,7 +62,7 @@ export class Mahafunc {
      * @param setDirty The function to call if an element inserts code requiring further processing
      * @param done Callback function if needed
      */
-    async process($element, metadata, setDirty: Function, done?: Function) {
+    async process($element, metadata, setDirty: Function, done?: Function): Promise<string | undefined> {
         throw new Error("The 'process' function must be overridden");
     }
 

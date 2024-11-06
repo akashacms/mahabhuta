@@ -20,7 +20,7 @@ export class Munger extends Mahafunc {
      * @param setDirty 
      * @param done 
      */
-    async process($, $element, metadata, setDirty: Function, done?: Function) {
+    async process($, $element, metadata, setDirty: Function, done?: Function): Promise<string | undefined> {
         throw new Error("The 'process' function must be overridden")
     }
 

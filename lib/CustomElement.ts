@@ -26,7 +26,7 @@ import { logProcessing, logPerformance } from './index';
      */
     get selector(): string { return this.elementName; }
 
-    async process($element, metadata, setDirty: Function, done?: Function) {
+    async process($element, metadata, setDirty: Function, done?: Function): Promise<string | undefined> {
         throw new Error("The 'process' function must be overridden");
     }
 
