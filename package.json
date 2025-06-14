@@ -36,17 +36,20 @@
     "node": ">=24.x"
   },
   "dependencies": {
+    "cheerio": "^1.1.x",
+    "commander": "^14.0.x"
+  },
+  "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "cheerio": "1.0.0-rc.12",
-    "commander": "^12.0.x",
+    "@types/node": "^24.x",
+    "typescript": "^5.8.x"
+  },
+  "peerDependencies": {
     "ejs": "^3.1.x",
     "handlebars": "^4.7.x",
     "js-yaml": "^4.1.x",
-    "liquidjs": "^10.10.x",
+    "liquidjs": "^10.21.x",
     "nunjucks": "3.2.x"
-  },
-  "devDependencies": {
-    "@types/node": "^24.x",
-    "typescript": "^5.8.x"
+
   }
 }
