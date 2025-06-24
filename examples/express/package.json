@@ -6,15 +6,15 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "body-parser": "~1.15.1",
-    "cheerio": "^0.22.0",
-    "cookie-parser": "~1.4.3",
-    "debug": "~3.1.0",
+    "body-parser": "~2.x",
+    "cheerio": "^^1.1.x",
+    "cookie-parser": "~1.4.x",
+    "debug": "~4.4.x",
     "ejs": "^3.1.x",
-    "express": "~4.13.4",
+    "express": "~4.21.x",
     "fs-extra-promise": "^0.4.1",
-    "morgan": "~1.9.1",
-    "serve-favicon": "~2.3.0",
+    "morgan": "~1.10.x",
+    "serve-favicon": "~2.5.x",
     "mahabhuta": ">=0.5"
   }
 }
