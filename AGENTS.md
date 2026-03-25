@@ -4,6 +4,8 @@
 
 Mahabhuta is a server-side DOM processing engine for Node.js that wraps [Cheerio](https://www.npmjs.com/package/cheerio) to provide jQuery-like HTML manipulation. It allows defining custom HTML-like tags (e.g., `<embed-video>`, `<site-verification>`) that are transformed into real HTML during processing.
 
+Mahabhuta is an engine for DOM-processing using the jQuery-like API provided by Cheerio.  HTML is provided to Mahabhuta, which uses Cheerio to parse it into a DOM, it then runs a bunch of manipulation functions where the jQuery-like does manipulation, and at the end the DOM is converted back into HTML.
+
 Part of the [AkashaCMS](https://akashacms.com/) ecosystem.
 
 ## Repository Structure
@@ -45,6 +47,23 @@ Mahafunc (base class)
 MahafuncArray      - Container that executes Mahafuncs in sequence
 ```
 
+### Mahafuncs
+
+The Mahafunc object, a.k.a. _Mahabhuta Function_, contains one type of DOM manipulation.  There are several Mahafunc subclasses for different purposes.  For each Mahafunc subclass, the `process` method is invoked to perform the DOM manipulation.  The bult-in Mahafunc subclasses are:
+
+* _CustomElement_ - Replaces a custom HTML element with other HTML.
+* _Munger_ - Access to anything on the page, can change anything.
+* _function_ - Left-over for compatibility with older Mahabhuta versions that simply used functions
+* The code also includes _ElementTweaker_ and _PageProcessor_ but it's not clear what these are for
+
+
+### MahafuncArrays
+
+The MahafuncArray object contains two arrays of Mahafuncs, `_mahaarray_functions` and `_mahaarray_final_functions`.  These arrays are to be executed to perform the desired DOM processing.  The arrays may also contain MahafuncArray objects allowing nested Mahafunc lists.
+
+For compatibility with older Mahabhuta releases, the code also supports a bare array holding Mahafuncs, in which case it forms an _inline_ MahafuncArray.
+
+
 ### Key Concepts
 
 1. **Selector**: Each Mahafunc defines a CSS selector to match elements
@@ -53,6 +72,15 @@ MahafuncArray      - Container that executes Mahafuncs in sequence
 4. **Processing Loop**: Continues until no function sets the dirty flag
 
 ### Processing Flow
+
+An application loads Mahafuncs into Mahafunc arrays.  This is likely to be nested Mahafunc arrays.  For example, in AkashaCMS, each plugin provides its own Mahafunc array.
+
+The application is likely to follow this sequence of operation:
+
+* Render the document content area using a template, producing HTML
+* Render the content area using a page layout template, producing HTML
+* Process that HTML with Mahabhuta using a Mahafunc array
+* Output the final HTML to a rendering destination
 
 ```
 HTML Input → parse() → Cheerio $ object
