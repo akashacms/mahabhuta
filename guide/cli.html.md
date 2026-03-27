@@ -27,7 +27,6 @@ Options:
   -o, --output <outputFN>       Specify output file name
   -m, --module <mahafuncFN...>  JavaScript file (or files) containing a defined MahafuncArray
   -c, --config <cheerioConfig>  YAML file containing Cheerio configuration
-  --trace-performance           Trace performance data
   --trace-processing            Trace processing
   --metadata <metadataFN>       YAML file containing data
   --options <optionsFN          YAML file containing options for mahabhuta arrays
