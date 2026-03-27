@@ -1,5 +1,5 @@
 
-import { logProcessing, logPerformance } from './index';
+import { logProcessing } from './index';
 import { Mahafunc } from './Mahafunc';
 import { PageProcessor } from './PageProcessor';
 import { CustomElement } from './CustomElement';
@@ -223,8 +223,6 @@ export class MahafuncArray {
                     logProcessing(`Mahabhuta FINISHED Munger ${this.name} ${mahafunc.selector}`);
                     // loops.push(`... Munger ${mahafunc.selector} ${(new Date() - startProcessing) / 1000} seconds`);
                 } else if (mahafunc instanceof PageProcessor) {
-                    // Performance testing
-                    const _start = new Date();
                     const start = processMetrics ? performance.now() : 0;
                     logProcessing(`Mahabhuta calling ${this.name} PageProcessor `);
                     try {
@@ -243,12 +241,7 @@ export class MahafuncArray {
                             timestamp: start
                         });
                     }
-                    // Performance testing
-                    logPerformance(_start, `PageProcessor ${this.name}`);
-                    // loops.push(`... PageProcessor ${(new Date() - startProcessing) / 1000} seconds`);
                 } else if (mahafunc instanceof MahafuncArray) {
-                    // Performance testing
-                    const _start = new Date();
                     const start = processMetrics ? performance.now() : 0;
                     let results = [];
                     try {
@@ -275,14 +268,7 @@ export class MahafuncArray {
                             timestamp: start
                         });
                     }
-                    // Performance testing
-                    logPerformance(_start, `MahafuncArray ${this.name} ${mahafunc.name}`)
-
-                    // results.forEach(result => { loops.push(`    ... "${mahafunc.name} result" ${result} ${(new Date() - startProcessing) / 1000} seconds`); });
-                    // loops.push(`... MahafuncArray ${mahafunc.name} ${(new Date() - startProcessing) / 1000} seconds`);
                 } else if (typeof mahafunc === 'function') {
-                    // Performance testing
-                    const _start = new Date();
                     const start = processMetrics ? performance.now() : 0;
                     logProcessing(`Mahabhuta calling an ${this.name} "function" `);
                     try {
@@ -306,12 +292,7 @@ export class MahafuncArray {
                             timestamp: start
                         });
                     }
-                    // Performance testing
-                    logPerformance(_start, `function ${this.name}`);
-                    // loops.push(`... MahafuncArray "function" ${(new Date() - startProcessing) / 1000} seconds`);
                 } else if (Array.isArray(mahafunc)) {
-                    // Performance testing
-                    const _start = new Date();
                     const start = processMetrics ? performance.now() : 0;
                     let mhObj = new MahafuncArray("inline", this.options);
                     mhObj.setMahafuncArray(mahafunc);
@@ -335,10 +316,6 @@ export class MahafuncArray {
                             timestamp: start
                         });
                     }
-                    // Performance testing
-                    logPerformance(_start, `Array ${this.name} inline`);
-                    // results.forEach(result => { loops.push(`    ... "inline result" ${result} ${(new Date() - startProcessing) / 1000} seconds`); });
-                    // loops.push(`... MahafuncArray "inline array" ${(new Date() - startProcessing) / 1000} seconds`);
                 } else {
                     console.error(`BAD MAHAFUNC in array ${this.name} - ${util.inspect(mahafunc)}`);
                 }

@@ -1,7 +1,6 @@
 
 import { Mahafunc } from "./Mahafunc";
 import * as util from 'util';
-import { logProcessing, logPerformance } from './index';
 
 /**
  * Implements an HTML-ish element that is replaced with
@@ -34,8 +33,6 @@ import { logProcessing, logPerformance } from './index';
         try {
             let elements = this.findElements($);
             if (elements.length <= 0) return;
-            // Performance testing
-            const _start = new Date();
 
             for (let element of elements) {
                 let replaceWith = await this.process($(element), metadata, setDirty);
@@ -45,8 +42,6 @@ import { logProcessing, logPerformance } from './index';
             /* if (this.elementName === "site-verification") {
                 console.log(`CustomElement ${this.elementName} `, $.html());
             } */
-            // Performance testing
-            logPerformance(_start, `CustomElement ${this.array.name} ${this.elementName}`);
         } catch (e) {
             console.error(`CustomElement ${this.elementName} Errored with ${util.inspect(e)}`);
             throw e;

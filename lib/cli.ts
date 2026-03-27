@@ -17,7 +17,6 @@ program.version(packageJSON.version, '-v, --version', 'output the current versio
 
 // Cheerio Config
 // Trace Processing
-// Trace Performance
 // metadata
 
 program
@@ -26,7 +25,6 @@ program
     .option('-o, --output <outputFN>', 'Specify output file name')
     .option('-m, --module <mahafuncFN...>', 'JavaScript file (or files) containing a defined MahafuncArray')
     .option('-c, --config <cheerioConfig>', 'YAML file containing Cheerio configuration')
-    .option('--trace-performance', 'Trace performance data')
     .option('--trace-processing', 'Trace processing')
     .option('--metadata <metadataFN>', 'YAML file containing data')
     .option('--options <optionsFN', 'YAML file containing options for mahabhuta arrays')
@@ -58,7 +56,6 @@ program
             }
             // console.log('After config');
 
-            if (cmdObj.tracePerformance) mahabhuta.setTracePerformance(true);
             if (cmdObj.traceProcessing)  mahabhuta.setTraceProcessing(true);
 
             let metadata = {};

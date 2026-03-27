@@ -52,7 +52,6 @@ import { PerfDataStore, ProcessMetrics } from './PerfDataStore';
 
 let configCheerio;
 let traceFlag = false;
-let tracePerf = false;
 
 /**
  * Set the Cheerio configuration.
@@ -72,14 +71,6 @@ export function setTraceProcessing(_traceFlag: boolean): void {
 }
 
 /**
- * Enable or disable "performance" tracing.
- * @param _traceFlag 
- */
-export function setTracePerformance(_traceFlag: boolean): void {
-    tracePerf = _traceFlag;
-}
-
-/**
  * Perform "processing" tracing, if enabled.
  * @param text 
  * @returns 
@@ -87,18 +78,6 @@ export function setTracePerformance(_traceFlag: boolean): void {
 export function logProcessing(text: string): void {
     if (!traceFlag) return;
     console.log(text);
-}
-
-/**
- * Perform "performance" tracing, if enabled.
- * @param start 
- * @param text 
- * @returns 
- */
-export function logPerformance(start: Date, text: string): void {
-    if (!tracePerf) return;
-    // https://stackoverflow.com/questions/14980014/how-can-i-calculate-the-time-between-2-dates-in-typescript
-    console.log(`${text} ${(new Date().getTime() - start.getTime()) / 1000} seconds`)
 }
 
 /**
