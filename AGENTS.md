@@ -20,6 +20,8 @@ mahabhuta/
 │   ├── PageProcessor.ts    # For processing entire pages
 │   ├── ElementTweaker.ts   # Element processor variant
 │   ├── MahafuncArray.ts    # Container for multiple Mahafuncs
+│   ├── PerfDataStore.ts    # Performance measurement types and base class
+│   ├── FilesystemPerfDataStore.ts  # Filesystem-based metrics storage
 │   └── cli.ts              # Command-line interface
 ├── maha/                   # Built-in Mahafunc implementations
 │   ├── partial.js          # <partial> tag for template includes
@@ -30,6 +32,10 @@ mahabhuta/
 │   └── *.js                # Test files
 ├── examples/               # Example implementations
 ├── guide/                  # Documentation source files
+├── AI/Performance/         # Performance measurement documentation
+│   ├── PERFORMANCE-MEASUREMENTS.md  # Feature specification
+│   ├── PERFORMANCE-USAGE.md         # Usage guide
+│   └── PERFORMANCE-PLAN.md          # Implementation tracking
 └── dist/                   # Compiled JavaScript output (generated)
 ```
 
@@ -176,6 +182,8 @@ module.exports.mahabhutaArray = function(options) {
 
 ## CLI Usage
 
+### Processing HTML
+
 ```bash
 mahabhuta process input.html \
     -o output.html \
@@ -184,6 +192,25 @@ mahabhuta process input.html \
     --metadata metadata.yaml \
     --partials \
     --partials-dir ./partials
+```
+
+### Performance Reports
+
+```bash
+# Generate performance reports from collected metrics
+mahabhuta perf-report <type> --data-dir ./metrics
+
+# Where <type> is one of:
+#   total        - Top N by total time consumed
+#   average      - Top N by average time per invocation
+#   arrays       - Breakdown by MahafuncArray
+#   distribution - Time distribution (min/max/median)
+#   all          - All reports combined
+
+# Additional options:
+#   --format json    - Output as JSON instead of text
+#   --top 10         - Limit to top 10 entries
+#   --filter "name"  - Filter by array path pattern
 ```
 
 ## Template Engine Support
@@ -210,8 +237,9 @@ mahabhuta.config({
 
 ```javascript
 mahabhuta.setTraceProcessing(true);  // Log processing steps
-mahabhuta.setTracePerformance(true); // Log timing information
 ```
+
+For comprehensive performance measurement and analysis, see the [Performance Measurement](#performance-measurement) section below.
 
 ## Testing Guidelines
 
@@ -248,6 +276,176 @@ async process($element, metadata, setDirty) {
     // ...
 }
 ```
+
+## Performance Measurement
+
+Mahabhuta includes comprehensive performance measurement capabilities to help identify bottlenecks and optimize DOM processing.
+
+### Overview
+
+Performance measurement allows you to:
+- Track execution time for individual Mahafuncs
+- Track execution time for MahafuncArrays
+- Analyze total, average, min, max, and median timing statistics
+- Generate reports to identify performance bottlenecks
+- Export data in JSON format for external analysis
+
+**Key Feature**: When disabled, performance measurement has zero overhead - no hidden performance costs.
+
+### Enabling Performance Measurement
+
+Pass a `FilesystemPerfDataStore` instance to `processAsync()`:
+
+```javascript
+const mahabhuta = require('mahabhuta');
+const { FilesystemPerfDataStore } = mahabhuta;
+
+// Create a data store that saves metrics to ./metrics directory
+const dataStore = new FilesystemPerfDataStore('./metrics');
+
+// Process HTML with metrics collection enabled
+const output = await mahabhuta.processAsync(
+    htmlContent,
+    metadata,
+    mahafuncArrays,
+    dataStore,           // Optional: enables metrics collection
+    'my-document.html'   // Optional: document identifier
+);
+```
+
+**Important**: When `dataStore` is not provided, metrics collection is completely disabled with zero performance overhead.
+
+### Generating Reports
+
+After collecting metrics, use the CLI to generate performance reports:
+
+```bash
+# Show top 20 Mahafuncs by total time consumed
+npx mahabhuta perf-report total --data-dir ./metrics
+
+# Show top 20 Mahafuncs by average time per invocation
+npx mahabhuta perf-report average --data-dir ./metrics
+
+# Show breakdown by MahafuncArray
+npx mahabhuta perf-report arrays --data-dir ./metrics
+
+# Show time distribution statistics (min/max/median)
+npx mahabhuta perf-report distribution --data-dir ./metrics
+
+# Show all reports combined
+npx mahabhuta perf-report all --data-dir ./metrics
+
+# Export as JSON for external analysis
+npx mahabhuta perf-report all --data-dir ./metrics --format json > stats.json
+
+# Filter to specific plugin
+npx mahabhuta perf-report average --filter "plugin-name"
+
+# Limit to top 10
+npx mahabhuta perf-report total --top 10
+```
+
+### Report Types
+
+1. **Total Time Report** - Identifies Mahafuncs with highest cumulative time
+2. **Average Time Report** - Identifies slowest Mahafuncs per execution
+3. **Arrays Report** - Shows time consumed by each MahafuncArray
+4. **Distribution Report** - Shows min/max/median timing variability
+
+### Example Report Output
+
+```
+=== Mahabhuta Performance Report ===
+
+Documents processed: 150
+Total processing time: 4523.45ms
+Average per document: 30.16ms
+
+--- Top 20 Mahafuncs by Total Time ---
+  master > akashacms-builtin
+    AkStylesheets (ak-stylesheets):
+    423.12ms total, 150 calls
+
+--- By MahafuncArray ---
+  master > akashacms-builtin:
+    1842.30ms total, 12.28ms avg, 150 calls
+```
+
+### Performance Characteristics
+
+**Measured Overhead** (from test suite):
+- With metrics enabled: 3-7% overhead
+- With metrics disabled: ~0% overhead (true zero impact)
+- Processing time: Typical 20-70ms per document
+
+### Programmatic Access
+
+Access metrics programmatically for custom analysis:
+
+```javascript
+const dataStore = new FilesystemPerfDataStore('./metrics');
+
+// Get aggregated statistics
+const stats = await dataStore.getAggregatedStats();
+
+console.log(`Processed ${stats.documentCount} documents`);
+console.log(`Average time: ${stats.avgProcessingMs.toFixed(2)}ms`);
+
+// Find slowest Mahafunc
+const slowest = stats.byMahafunc
+    .sort((a, b) => b.totalDurationMs - a.totalDurationMs)[0];
+console.log(`Slowest: ${slowest.className} - ${slowest.totalDurationMs.toFixed(2)}ms total`);
+
+// Get all raw metrics
+const allMetrics = await dataStore.getAllMetrics();
+
+// Clear metrics when done
+await dataStore.clear();
+```
+
+### Data Structure
+
+Each document processing creates metrics with:
+- **Full array path tracking** - E.g., `["master", "akashacms-builtin", "nested-plugin"]`
+- **Mahafunc class names** - E.g., `SiteVerification`, `OpenGraphMunger`
+- **Timing data** - Using high-precision `performance.now()`
+- **Statistics** - min, max, median, avg, total time, invocation count
+
+### Best Practices
+
+**During Development:**
+- Enable metrics for representative document samples
+- Focus on outliers (high average or max times)
+- Use distribution reports to identify inconsistent performance
+- Filter reports to drill down into specific plugins
+
+**In Production:**
+- Keep metrics disabled unless debugging specific issues
+- Enable selectively for problem documents using documentId
+- Clear old metrics periodically to manage disk space
+
+**Optimization Workflow:**
+1. Run processing with metrics enabled
+2. Generate "total" and "average" reports
+3. Identify top 5-10 bottlenecks
+4. Use "distribution" report to understand variability
+5. Optimize identified Mahafuncs
+6. Re-measure to verify improvements
+
+### Implementation Notes
+
+- **Zero overhead design**: Guard clauses ensure no performance impact when disabled
+- **Backward compatible**: All new parameters are optional
+- **High precision**: Uses `performance.now()` for microsecond-level timing
+- **Nested array tracking**: Full path through nested MahafuncArrays
+- **Flexible storage**: Abstract `PerfDataStore` allows custom implementations
+
+### Documentation
+
+For complete details, see:
+- **[AI/Performance/PERFORMANCE-USAGE.md](./AI/Performance/PERFORMANCE-USAGE.md)** - Comprehensive usage guide
+- **[AI/Performance/PERFORMANCE-MEASUREMENTS.md](./AI/Performance/PERFORMANCE-MEASUREMENTS.md)** - Feature specification
+- **[AI/Performance/PERFORMANCE-PLAN.md](./AI/Performance/PERFORMANCE-PLAN.md)** - Implementation details
 
 ## Dependencies
 
