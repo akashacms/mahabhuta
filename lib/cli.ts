@@ -3,6 +3,8 @@ import { program } from 'commander';
 import * as mahabhuta from './index.js';
 import { promises as fsp } from 'fs';
 import YAML from 'js-yaml';
+import { FilesystemPerfDataStore } from './FilesystemPerfDataStore.js';
+import { AggregatedStats, MahafuncStats, MahafuncArrayStats } from './PerfDataStore.js';
 
 // mahabhuta process file.html -o file2.html -m mahafuncs.js -m mahafuncs2.js -m mahafuncs3.js --options options.yaml --metadata metadata.yaml
 
@@ -15,7 +17,6 @@ program.version(packageJSON.version, '-v, --version', 'output the current versio
 
 // Cheerio Config
 // Trace Processing
-// Trace Performance
 // metadata
 
 program
@@ -24,7 +25,6 @@ program
     .option('-o, --output <outputFN>', 'Specify output file name')
     .option('-m, --module <mahafuncFN...>', 'JavaScript file (or files) containing a defined MahafuncArray')
     .option('-c, --config <cheerioConfig>', 'YAML file containing Cheerio configuration')
-    .option('--trace-performance', 'Trace performance data')
     .option('--trace-processing', 'Trace processing')
     .option('--metadata <metadataFN>', 'YAML file containing data')
     .option('--options <optionsFN', 'YAML file containing options for mahabhuta arrays')
@@ -56,7 +56,6 @@ program
             }
             // console.log('After config');
 
-            if (cmdObj.tracePerformance) mahabhuta.setTracePerformance(true);
             if (cmdObj.traceProcessing)  mahabhuta.setTraceProcessing(true);
 
             let metadata = {};
@@ -121,5 +120,178 @@ program
         }
 
     });
+
+// Performance reporting commands
+program
+    .command('perf-report')
+    .description('Generate performance reports from stored metrics')
+    .argument('<report-type>', 'Report type: total, average, arrays, distribution, or all')
+    .option('--data-dir <path>', 'Path to performance data directory', './mahabhuta-metrics')
+    .option('--top <N>', 'Limit to top N entries', '20')
+    .option('--format <type>', 'Output format: text or json', 'text')
+    .option('--filter <pattern>', 'Filter by MahafuncArray path pattern')
+    .action(async (reportType, cmdObj) => {
+        try {
+            const dataStore = new FilesystemPerfDataStore(cmdObj.dataDir);
+            const stats = await dataStore.getAggregatedStats();
+            const topN = parseInt(cmdObj.top, 10);
+            const filter = cmdObj.filter || null;
+
+            if (cmdObj.format === 'json') {
+                // JSON output
+                const output = generateJSONReport(reportType, stats, topN, filter);
+                console.log(JSON.stringify(output, null, 2));
+            } else {
+                // Text output
+                const output = generateTextReport(reportType, stats, topN, filter);
+                console.log(output);
+            }
+        } catch (e) {
+            console.error(`perf-report command ERRORED ${e.stack}`);
+        }
+    });
+
+/**
+ * Filter stats by array path pattern if provided
+ */
+function filterByPath<T extends { arrayPath: string[] }>(items: T[], pattern: string | null): T[] {
+    if (!pattern) return items;
+    return items.filter(item => {
+        const pathStr = item.arrayPath.join('/');
+        return pathStr.includes(pattern);
+    });
+}
+
+/**
+ * Generate JSON format report
+ */
+function generateJSONReport(reportType: string, stats: AggregatedStats, topN: number, filter: string | null): any {
+    const output: any = {
+        documentCount: stats.documentCount,
+        totalProcessingMs: stats.totalProcessingMs,
+        avgProcessingMs: stats.avgProcessingMs
+    };
+
+    if (reportType === 'total' || reportType === 'all') {
+        const filtered = filterByPath(stats.byMahafunc, filter);
+        output.topByTotalTime = filtered
+            .sort((a, b) => b.totalDurationMs - a.totalDurationMs)
+            .slice(0, topN);
+    }
+
+    if (reportType === 'average' || reportType === 'all') {
+        const filtered = filterByPath(stats.byMahafunc, filter);
+        output.topByAverageTime = filtered
+            .sort((a, b) => b.avgDurationMs - a.avgDurationMs)
+            .slice(0, topN);
+    }
+
+    if (reportType === 'arrays' || reportType === 'all') {
+        const filtered = filterByPath(stats.byArray, filter);
+        output.byArray = filtered
+            .sort((a, b) => b.totalDurationMs - a.totalDurationMs);
+    }
+
+    if (reportType === 'distribution' || reportType === 'all') {
+        const filtered = filterByPath(stats.byMahafunc, filter);
+        output.distribution = filtered
+            .sort((a, b) => b.totalDurationMs - a.totalDurationMs)
+            .slice(0, topN)
+            .map(s => ({
+                arrayPath: s.arrayPath,
+                className: s.className,
+                selector: s.selector,
+                invocationCount: s.invocationCount,
+                min: s.minDurationMs,
+                max: s.maxDurationMs,
+                median: s.medianDurationMs,
+                avg: s.avgDurationMs
+            }));
+    }
+
+    return output;
+}
+
+/**
+ * Generate text format report
+ */
+function generateTextReport(reportType: string, stats: AggregatedStats, topN: number, filter: string | null): string {
+    const lines: string[] = [];
+
+    lines.push('=== Mahabhuta Performance Report ===\n');
+    lines.push(`Documents processed: ${stats.documentCount}`);
+    lines.push(`Total processing time: ${stats.totalProcessingMs.toFixed(2)}ms`);
+    lines.push(`Average per document: ${stats.avgProcessingMs.toFixed(2)}ms`);
+    if (filter) {
+        lines.push(`Filter: ${filter}`);
+    }
+    lines.push('');
+
+    if (reportType === 'total' || reportType === 'all') {
+        lines.push(`--- Top ${topN} Mahafuncs by Total Time ---`);
+        const filtered = filterByPath(stats.byMahafunc, filter);
+        const sorted = filtered
+            .sort((a, b) => b.totalDurationMs - a.totalDurationMs)
+            .slice(0, topN);
+        
+        for (const s of sorted) {
+            const pathStr = s.arrayPath.join(' > ');
+            lines.push(`  ${pathStr}`);
+            lines.push(`    ${s.className} (${s.selector}):`);
+            lines.push(`    ${s.totalDurationMs.toFixed(2)}ms total, ${s.invocationCount} calls`);
+        }
+        lines.push('');
+    }
+
+    if (reportType === 'average' || reportType === 'all') {
+        lines.push(`--- Top ${topN} Mahafuncs by Average Time ---`);
+        const filtered = filterByPath(stats.byMahafunc, filter);
+        const sorted = filtered
+            .sort((a, b) => b.avgDurationMs - a.avgDurationMs)
+            .slice(0, topN);
+        
+        for (const s of sorted) {
+            const pathStr = s.arrayPath.join(' > ');
+            lines.push(`  ${pathStr}`);
+            lines.push(`    ${s.className} (${s.selector}):`);
+            lines.push(`    ${s.avgDurationMs.toFixed(2)}ms avg, ${s.invocationCount} calls`);
+        }
+        lines.push('');
+    }
+
+    if (reportType === 'arrays' || reportType === 'all') {
+        lines.push('--- By MahafuncArray ---');
+        const filtered = filterByPath(stats.byArray, filter);
+        const sorted = filtered
+            .sort((a, b) => b.totalDurationMs - a.totalDurationMs);
+        
+        for (const s of sorted) {
+            const pathStr = s.arrayPath.join(' > ');
+            lines.push(`  ${pathStr}:`);
+            lines.push(`    ${s.totalDurationMs.toFixed(2)}ms total, ${s.avgDurationMs.toFixed(2)}ms avg, ${s.invocationCount} calls`);
+        }
+        lines.push('');
+    }
+
+    if (reportType === 'distribution' || reportType === 'all') {
+        lines.push(`--- Time Distribution (Top ${topN}) ---`);
+        const filtered = filterByPath(stats.byMahafunc, filter);
+        const sorted = filtered
+            .sort((a, b) => b.totalDurationMs - a.totalDurationMs)
+            .slice(0, topN);
+        
+        for (const s of sorted) {
+            const pathStr = s.arrayPath.join(' > ');
+            lines.push(`  ${pathStr}`);
+            lines.push(`    ${s.className} (${s.selector}):`);
+            lines.push(`    Min: ${s.minDurationMs.toFixed(2)}ms, Max: ${s.maxDurationMs.toFixed(2)}ms`);
+            lines.push(`    Median: ${s.medianDurationMs.toFixed(2)}ms, Avg: ${s.avgDurationMs.toFixed(2)}ms`);
+            lines.push(`    ${s.invocationCount} calls`);
+        }
+        lines.push('');
+    }
+
+    return lines.join('\n');
+}
 
 program.parse();

@@ -27,6 +27,7 @@
 
 import * as cheerio from 'cheerio';
 import * as util from 'util';
+import { performance } from 'perf_hooks';
 
 export { Mahafunc } from './Mahafunc';
 export { CustomElement } from './CustomElement';
@@ -34,13 +35,23 @@ export { ElementTweaker } from './ElementTweaker';
 export { MahafuncArray, MahafuncType } from './MahafuncArray';
 export { Munger } from './Munger';
 export { PageProcessor } from './PageProcessor';
+export { 
+    PerfDataStore,
+    MahafuncTiming,
+    MahafuncArrayTiming,
+    ProcessMetrics,
+    MahafuncStats,
+    MahafuncArrayStats,
+    AggregatedStats
+} from './PerfDataStore';
+export { FilesystemPerfDataStore } from './FilesystemPerfDataStore';
 
 import { Mahafunc } from './Mahafunc';
 import { MahafuncArray, MahafuncType } from './MahafuncArray';
+import { PerfDataStore, ProcessMetrics } from './PerfDataStore';
 
 let configCheerio;
 let traceFlag = false;
-let tracePerf = false;
 
 /**
  * Set the Cheerio configuration.
@@ -60,14 +71,6 @@ export function setTraceProcessing(_traceFlag: boolean): void {
 }
 
 /**
- * Enable or disable "performance" tracing.
- * @param _traceFlag 
- */
-export function setTracePerformance(_traceFlag: boolean): void {
-    tracePerf = _traceFlag;
-}
-
-/**
  * Perform "processing" tracing, if enabled.
  * @param text 
  * @returns 
@@ -75,18 +78,6 @@ export function setTracePerformance(_traceFlag: boolean): void {
 export function logProcessing(text: string): void {
     if (!traceFlag) return;
     console.log(text);
-}
-
-/**
- * Perform "performance" tracing, if enabled.
- * @param start 
- * @param text 
- * @returns 
- */
-export function logPerformance(start: Date, text: string): void {
-    if (!tracePerf) return;
-    // https://stackoverflow.com/questions/14980014/how-can-i-calculate-the-time-between-2-dates-in-typescript
-    console.log(`${text} ${(new Date().getTime() - start.getTime()) / 1000} seconds`)
 }
 
 /**
@@ -118,9 +109,11 @@ export function parse(text: string) {
 export async function process(
             text: string, metadata,
             mahabhutaFuncs: MahafuncArray | Array<MahafuncType>,
-            done?: Function) {
+            done?: Function,
+            dataStore?: PerfDataStore,
+            documentId?: string) {
     
-    let ret = processAsync(text, metadata, mahabhutaFuncs);
+    let ret = processAsync(text, metadata, mahabhutaFuncs, dataStore, documentId);
     if (done) {
         ret.then(html => { done(undefined, html); })
            .catch(err => { done(err); });
@@ -132,10 +125,23 @@ export async function process(
  * Process the text using functions supplied in the array mahabhutaFuncs.
  */
 export async function processAsync(
-                text: string, metadata: Object,
-                mahabhutaFuncs: MahafuncArray | Array<MahafuncType>) {
+                text: string, 
+                metadata: Object,
+                mahabhutaFuncs: MahafuncArray | Array<MahafuncType>,
+                dataStore?: PerfDataStore,
+                documentId?: string) {
 
     if (!mahabhutaFuncs || mahabhutaFuncs.length < 0) mahabhutaFuncs = [];
+
+    // Start performance measurement if dataStore provided
+    const startTime = dataStore ? performance.now() : 0;
+    const processMetrics: ProcessMetrics | undefined = dataStore ? {
+        totalDurationMs: 0,
+        timestamp: startTime,
+        documentId,
+        mahafuncTimings: [],
+        arrayTimings: []
+    } : undefined;
 
     let cleanOrDirty = 'first-time';
 
@@ -160,13 +166,19 @@ export async function processAsync(
         } else throw new Error(`Bad mahabhutaFuncs object supplied`);
 
         cleanOrDirty = 'clean';
-        /* let results = */ await mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; });
+        /* let results = */ await mhObj.process($, metadata, () => { cleanOrDirty = 'dirty'; }, processMetrics, []);
 
         // results.forEach(result => { loops.push(mhObj.name +'  '+ result); });
         // console.log(`MAHABHUTA processAsync ${metadata.document.path} FINISH ${(new Date() - startProcessing) / 1000} seconds ${cleanOrDirty}`);
     } while (cleanOrDirty === 'dirty');
 
     // loops.forEach(l => { console.log(l); });
+
+    // Record metrics if dataStore provided
+    if (dataStore && processMetrics) {
+        processMetrics.totalDurationMs = performance.now() - startTime;
+        await dataStore.recordProcessMetrics(processMetrics);
+    }
 
     return $.html();
 }

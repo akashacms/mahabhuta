@@ -1,7 +1,6 @@
 
 import { Mahafunc } from "./Mahafunc";
 import * as util from 'util';
-import { logProcessing, logPerformance } from './index';
 
 export class Munger extends Mahafunc {
     get elementName(): string {
@@ -28,14 +27,10 @@ export class Munger extends Mahafunc {
         try {
             var elements = this.findElements($);
             if (elements.length <= 0) return;
-            // Performance testing
-            const _start = new Date();
             // console.log(`Munger ${this.array.name} ${this.elementName} found ${elements.length} elements`);
             for (let element of elements) {
                 await this.process($, $(element), metadata, setDirty);
             }
-            // Performance testing
-            logPerformance(_start, `Munger ${this.array.name} ${this.elementName}`);
         } catch (e) {
             console.error(`Munger ${this.selector} Errored with ${util.inspect(e)}`);
             throw e;
