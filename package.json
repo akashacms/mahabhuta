@@ -13,17 +13,18 @@
     "html",
     "DOM",
     "template",
-    "cheerio"
+    "cheerio",
+    "akashacms"
   ],
   "description": "Server-side DOM processing for HTML documents using jQuery-like API",
   "homepage": "https://github.com/akashacms/mahabhuta",
   "repository": {
     "type": "git",
-    "url": "https://github.com/akashacms/mahabhuta.git"
+    "url": "git+https://github.com/akashacms/mahabhuta.git"
   },
   "scripts": {
     "build:lib": "npx tsc",
-    "predopublish": "cd test && npm install && npm test",
+    "test": "cd test && npm install && npm test",
     "dopublish": "npm publish --access public"
   },
   "main": "./dist/index.js",
