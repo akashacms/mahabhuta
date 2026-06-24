@@ -30,15 +30,15 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "mahabhuta": "./dist/cli.js"
+    "mahabhuta": "dist/cli.js"
   },
   "version": "0.9.1",
   "engines": {
     "node": ">=24.x"
   },
   "dependencies": {
-    "cheerio": "^1.1.x",
-    "commander": "^14.0.x"
+    "cheerio": "^1.2.x",
+    "commander": "^15.x"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
@@ -46,11 +46,10 @@
     "typescript": "^5.8.x"
   },
   "peerDependencies": {
-    "ejs": "^3.1.x",
+    "ejs": "^6.x",
     "handlebars": "^4.7.x",
-    "js-yaml": "^4.1.x",
-    "liquidjs": "^10.21.x",
+    "js-yaml": "^5.1.x",
+    "liquidjs": "^10.27.x",
     "nunjucks": "3.2.x"
-
   }
 }
